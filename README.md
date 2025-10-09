@@ -1,3 +1,30 @@
+
+## Basic info
+
+Fork created for _Artificial Intelligence <3 Games: Procedural Content_ lecture by Jakub Kowalski, University of Wrocław, 2025.
+
+## Quick setup
+
+1. Java required. IntelliJ IDEA recommended.
+2. Clone / download the repository. 
+3. IntelliJ: `New -> Project from Existing Sources`.
+4. [src/GenerateLevel.java](src/GenerateLevel.java), right click, `Run 'GenerateLevel.main()'`.
+5. Hopefully it worked.
+
+## Running the game
+
+Comment/uncomment lines in [src/GenerateLevel.java](src/GenerateLevel.java) to switch between using a level generator or a file with predefined level as well as playing a level yourself or running an AI agent.
+
+
+## Level description
+
+- Levels are strings / text files, where each character represents a tile.
+- You can see examples in `levels` directory, and constants are defined in [src/engine/core/MarioLevelModel.java](src/engine/core/MarioLevelModel.java).
+- More comprehensive description is in [levels/README.md](levels/README.md).
+
+
+# Original README
+
 <p align="center">
 <a href="#features">Features</a> &mdash; <a href="#use">How To Use</a> &mdash; <a href="#papers">Related Papers</a> &mdash; <a href="#missing">Missing Features</a> &mdash; <a href="#copyrights">Copyrights</a>
 </p>
