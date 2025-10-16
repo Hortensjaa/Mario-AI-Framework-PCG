@@ -6,10 +6,11 @@ Fork created for _Artificial Intelligence <3 Games: Procedural Content_ lecture 
 ## Quick setup
 
 1. Java required. IntelliJ IDEA recommended.
-2. Clone / download the repository. 
+2. Clone / download the repository.
 3. IntelliJ: `New -> Project from Existing Sources`.
 4. [src/GenerateLevel.java](src/GenerateLevel.java), right click, `Run 'GenerateLevel.main()'`.
 5. Hopefully it worked.
+6. Alternatively, you can just type `./gradlew run` in your terminal (or `.\gradlew.bat run` for Windows).
 
 ## Running the game
 
