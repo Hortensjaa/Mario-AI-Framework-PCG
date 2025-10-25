@@ -110,6 +110,6 @@ public class GenerateLevel {
 //        MarioResult runresult = game.runGame(marioagent, level, TIMER, 0, true);
 //        printResults(runresult);
 
-        runMultiple(generator, marioagent, 5, false);
+        runMultiple(generator, marioagent, 1, true);
     }
 }
