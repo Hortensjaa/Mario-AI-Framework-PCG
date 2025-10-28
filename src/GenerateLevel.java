@@ -79,11 +79,12 @@ public class GenerateLevel {
         MarioGame game = new MarioGame();
 
         /* todo choose map generator to create a level (uncomment the one you want to use): */
+        MarioLevelGenerator generator = new levelGenerators.list2.LevelGenerator();
 //        MarioLevelGenerator generator = new levelGenerators.notch.LevelGenerator();    // original generator by Notch
 //        MarioLevelGenerator generator = new levelGenerators.benWeber.LevelGenerator(); // winner of the 2010 PCG Mario AI Competition: makes multiple passes along the level, in each pass adding a new type of level item
 //        MarioLevelGenerator generator = new levelGenerators.linear.LevelGenerator();     // flat ground with holes, occasional pipes and monsters
 //        MarioLevelGenerator generator = new levelGenerators.sampler.LevelGenerator();  // creates levels by sampling parts of original levels
-        MarioLevelGenerator generator = new levelGenerators.random.LevelGenerator();   // places objects randomly
+//        MarioLevelGenerator generator = new levelGenerators.random.LevelGenerator();   // places objects randomly
 
         /* todo choose level from generator or file */
         String level = generator.getGeneratedLevel(new MarioLevelModel(LEVEL_WIDTH, LEVEL_HEIGHT), new MarioTimer(5 * 60 * 60 * 1000));
@@ -104,12 +105,12 @@ public class GenerateLevel {
 //        MarioAgent marioagent = new agents.sergeyKarakovskiy.Agent();// max run and jump to the right
 //        MarioAgent marioagent = new agents.random.Agent();           // random agent (much higher probabilities to run/jump right)
 //        MarioAgent marioagent = new agents.doNothing.Agent();        // stays in place
-        MarioAgent marioagent = new agents.collector.Agent();        // A* with bonus for collecting coins;  from: https://github.com/obsidian-zero/Mario-AI-Framework
-//        MarioAgent marioagent = new agents.killer.Agent();           // A* with bonus for defeating enemies; from: https://github.com/obsidian-zero/Mario-AI-Framework
+//        MarioAgent marioagent = new agents.collector.Agent();        // A* with bonus for collecting coins;  from: https://github.com/obsidian-zero/Mario-AI-Framework
+        MarioAgent marioagent = new agents.killer.Agent();           // A* with bonus for defeating enemies; from: https://github.com/obsidian-zero/Mario-AI-Framework
 
 //        MarioResult runresult = game.runGame(marioagent, level, TIMER, 0, true);
 //        printResults(runresult);
 
-        runMultiple(generator, marioagent, 1, true);
+        runMultiple(generator, marioagent, 10, true);
     }
 }
