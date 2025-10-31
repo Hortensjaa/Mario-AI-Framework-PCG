@@ -19,8 +19,8 @@ public class TerrainGenerator {
         // <c> ::= G | J | T | P | B
         grammarRules.put("c", List.of(
                 new Rule("G", 0.3),   // ground
-                new Rule("J", 0.3),   // jump
-                new Rule("T", 0.15),   // tube
+                new Rule("J", 0.2),   // jump
+                new Rule("T", 0.2),   // tube
                 new Rule("P", 0.1),   // pit
                 new Rule("B", 0.05)    // bullet bill
         ));

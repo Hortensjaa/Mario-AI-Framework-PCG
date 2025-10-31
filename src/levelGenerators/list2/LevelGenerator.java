@@ -8,6 +8,9 @@ import java.util.*;
 
 /**
  * Grammar-based Mario level generator with weighted production rules.
+ * 1. Generate terrain based on grammar
+ * 2. Decorate terrain using hazards
+ * 3. Validate and fix "risk points"
  */
 public class LevelGenerator implements MarioLevelGenerator {
     private final Random random = new Random();
@@ -36,14 +39,14 @@ public class LevelGenerator implements MarioLevelGenerator {
 
         model.setBlock(0, 0, MarioLevelModel.MARIO_START);
 
-        // 1. Generate grammar string using weighted rules
+        // 0. Generate grammar string using weighted rules
         String terrain = grammarGenerator.generate(64);
         System.out.println("Base terrain: " + terrain);
 
         String hazards = hazardDecorator.decorate(terrain);
         System.out.println("Hazards: " + hazards);
 
-        // 2. Build terrain
+        // 1. Build terrain
         currentX = 0;
         for (int i = 0; i < terrain.length(); i++) {
             if (currentX >= width) break;
@@ -53,10 +56,10 @@ public class LevelGenerator implements MarioLevelGenerator {
             // terrain
             switch (terrain.charAt(i)) {
                 case 'P' -> {
-                    if (i >= 1 && terrain.charAt(i-1) != 'P')
+//                    if (i >= 1 && terrain.charAt(i-1) != 'P')
                         currentX += buildPit();
-                    else
-                        currentX += buildGround();
+//                    else
+//                        currentX += buildGround();
                 }
                 case 'G' -> currentX += buildGround();
                 case 'J' -> currentX += buildJump();
@@ -64,7 +67,7 @@ public class LevelGenerator implements MarioLevelGenerator {
                 case 'B' -> currentX += buildBulletBill();
             }
 
-            // hazards
+            // 2. add hazards
             switch (hazards.charAt(i)) {
                 case 'E' -> placeEnemy(xBefore);
                 case 'C' -> placeCoins(xBefore);
@@ -83,6 +86,9 @@ public class LevelGenerator implements MarioLevelGenerator {
 
         buildFlatTerrain( currentX-5, 5);
         model.setBlock(currentX, BASE_FLOOR+1, MarioLevelModel.MARIO_EXIT);
+
+        // fixers
+        fixPits();
 
         return model.getMap();
     }
@@ -136,7 +142,7 @@ public class LevelGenerator implements MarioLevelGenerator {
         if (segmentLength <= 1) return;
 
         // Decide rectangle size: width (cols) and height (rows)
-        int rectCols = 1 + random.nextInt(Math.max(1, Math.min(segmentLength - 1, 6))); // limit width to keep reasonable
+        int rectCols = 1 + random.nextInt(Math.max(1, segmentLength - 1)); // limit width to keep reasonable
         int rectRows = 1 + random.nextInt(3); // 1..3 rows of coins
 
         // choose random start so the rectangle fits in the segment
@@ -144,11 +150,11 @@ public class LevelGenerator implements MarioLevelGenerator {
         int endX = startX + rectCols;
 
         // Height above the floor for the top row of coins
-        int topOffset = 1 + random.nextInt(Math.max(1, MAX_JUMP_HEIGHT - 1));
+        int topOffset = 2 + random.nextInt(Math.max(1, MAX_JUMP_HEIGHT - 1));
+        int floorY = getFloorY(xBefore + (segmentLength / 2));
 
         // Place the rectangle of coins. For each column, compute floor and stack rows above it.
         for (int x = startX; x < endX; x++) {
-            int floorY = getFloorY(x);
             // If it's a pit (floorY == 0), skip this column
             if (floorY <= 0) continue;
             int topY = floorY - topOffset; // y coordinate for top coin row
@@ -171,13 +177,13 @@ public class LevelGenerator implements MarioLevelGenerator {
         int lineLength = 2 + random.nextInt(Math.max(1, segmentLength / 2));
 
         int startX = xBefore + random.nextInt(Math.max(1, segmentLength - lineLength + 1));
-        int endX = startX + lineLength;
+        int endX = Math.min(startX + lineLength, currentX - 1);
 
         char[] blockTypes =  MarioLevelModel.getBumpableTiles();
         int blockId = random.nextInt(Math.max(1, blockTypes.length));
 
         for (int x = startX; x < endX; x++) {
-            model.setBlock(x, getFloorY(x) - lineHeight, blockTypes[blockId]);
+            model.setBlock(x, getFloorY(x) - lineHeight, MarioLevelModel.LIFE_BRICK);
         }
     }
 
@@ -186,7 +192,46 @@ public class LevelGenerator implements MarioLevelGenerator {
         int enemyX = xBefore + segmentLength / 2;
         model.setBlock(enemyX, getFloorY(enemyX) - 1, MarioLevelModel.GOOMBA);
         if (segmentLength >= 4) {
-            model.setBlock(enemyX + 1, getFloorY(enemyX) - 1, MarioLevelModel.GREEN_KOOPA);
+            model.setBlock(enemyX + 2, getFloorY(enemyX) - 1, MarioLevelModel.GREEN_KOOPA);
+        }
+    }
+
+    // ==== FIXERS ====
+    private void fixPits() {
+        int pitStart = -1;
+
+        for (int x = 0; x < model.getWidth(); x++) {
+            boolean isPit = model.getBlock(x, BASE_FLOOR) == MarioLevelModel.EMPTY;
+
+            if (isPit && pitStart == -1) {
+                pitStart = x;
+            } else if (!isPit && pitStart != -1) {
+                int pitWidth = x - pitStart;
+                if (pitWidth > MAX_PIT_WIDTH) {
+                    int fillStart = pitStart + pitWidth / 2 - 1;
+                    int fillEnd = pitStart + pitWidth / 2 + 1;
+                    for (int fx = fillStart; fx <= fillEnd; fx++) {
+                        for (int y = BASE_FLOOR; y < model.getHeight(); y++) {
+                            model.setBlock(fx, y, MarioLevelModel.GROUND);
+                        }
+                    }
+                }
+                pitStart = -1;
+            }
+        }
+
+        // Handle pit at the end
+        if (pitStart != -1) {
+            int pitWidth = model.getWidth() - pitStart;
+            if (pitWidth > MAX_PIT_WIDTH) {
+                int fillStart = pitStart + pitWidth / 2 - 1;
+                int fillEnd = pitStart + pitWidth / 2 + 1;
+                for (int fx = fillStart; fx <= fillEnd; fx++) {
+                    for (int y = BASE_FLOOR; y < model.getHeight(); y++) {
+                        model.setBlock(fx, y, MarioLevelModel.GROUND);
+                    }
+                }
+            }
         }
     }
 
@@ -201,7 +246,8 @@ public class LevelGenerator implements MarioLevelGenerator {
 
     private int getFloorY(int x) {
         for (int y = 0; y < model.getHeight(); y++) {
-            if (model.getBlock(x, y) != MarioLevelModel.EMPTY) {
+            if (model.getBlock(x, y) != MarioLevelModel.EMPTY &&
+                    model.getBlock(x, y) != MarioLevelModel.COIN) {
                 return y;
             }
         }

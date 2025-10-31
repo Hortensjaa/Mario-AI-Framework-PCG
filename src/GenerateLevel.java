@@ -38,7 +38,7 @@ public class GenerateLevel {
             System.out.println("Running level " + (i + 1) + "..." + (visuals ? "" : " (headless)"));
             //printLevel(level);
             MarioResult runresult = game.runGame(agent, level, TIMER, 0, visuals);
-            //printResults(runresult);
+            printResults(runresult);
 
             totalProgress += runresult.getCompletionPercentage();
             if (runresult.getGameStatus() == GameStatus.WIN) passed++;
@@ -105,12 +105,12 @@ public class GenerateLevel {
 //        MarioAgent marioagent = new agents.sergeyKarakovskiy.Agent();// max run and jump to the right
 //        MarioAgent marioagent = new agents.random.Agent();           // random agent (much higher probabilities to run/jump right)
 //        MarioAgent marioagent = new agents.doNothing.Agent();        // stays in place
-//        MarioAgent marioagent = new agents.collector.Agent();        // A* with bonus for collecting coins;  from: https://github.com/obsidian-zero/Mario-AI-Framework
-        MarioAgent marioagent = new agents.killer.Agent();           // A* with bonus for defeating enemies; from: https://github.com/obsidian-zero/Mario-AI-Framework
+        MarioAgent marioagent = new agents.collector.Agent();        // A* with bonus for collecting coins;  from: https://github.com/obsidian-zero/Mario-AI-Framework
+//        MarioAgent marioagent = new agents.killer.Agent();           // A* with bonus for defeating enemies; from: https://github.com/obsidian-zero/Mario-AI-Framework
 
 //        MarioResult runresult = game.runGame(marioagent, level, TIMER, 0, true);
 //        printResults(runresult);
 
-        runMultiple(generator, marioagent, 10, true);
+        runMultiple(generator, marioagent, 50, false);
     }
 }

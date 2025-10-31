@@ -1,0 +1,16 @@
+M-----------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------
+o-------------------------------------------------------------------------------------------------o-------L-------------------------------------------
+o-----------------------------------------------------------------------o-------------------------o---------------------------------------------------
+o---LLL-----o-----------------------------------------------------------o-------------------------o-----------------------------------------o--------L
+----------------o--------LL---------o--------------------------k-----g--o-------------------------------------------------------------------o---------
+-------------k----------------------o-----k------------------g---LL-LL------------------------------------k--------oo---------------o-------o-k----o--
+-----------g-----kLL-------------oo-o---g------------------LLL----------g----k-L-----------L-----o------g--LL----L-oo--k------------o-------g--LL--oL-
+-tt-XXXXX-tt---g------tt---------oo----LL----------tt-----------L------XX--g------------------*--oXX---tt------------g---------------------tt--------t
+-tt-XXXXX-tt--tt------tt-XXX-tt------------tt---*--tt-----k------tt-XXXXXXXXXX--------------g-*--oXX---tt----------XXXXXo----tt------tt----tt--------t
+-tt-XXXXX-tt--tt------tt-XXX-tt----XX------tt---*--tt---g--------tt-XXXXXXXXXX----g-------gXX-*--gXX-g-tt------XXXXXXXXX-g---tt------tt-XX-tt--------t
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX-XXXXXXXX-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX-XXXXXXXX-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX-XXXXXXXX-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX-XXXXXXXX-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

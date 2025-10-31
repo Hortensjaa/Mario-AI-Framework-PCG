@@ -7,9 +7,9 @@ public class HazardDecorator {
     private final Random random = new Random();
 
     // Probability settings
-    private final double coinChance = 0.5;    // 50% of suitable segments get some coins
-    private final double enemyChance = 0.4;  // 50% of suitable segments get an enemy
-    private final double blockChance = 0.3;  // 20% of suitable segments get block
+    private final double coinChance = 0.4;    // 70% of suitable segments get some coins
+    private final double enemyChance = 0.35;  // 40% of suitable segments get an enemy
+    private final double blockChance = 0.4;  // 20% of suitable segments get block
 
     /**
      * Adds coins, blocks, and enemies to a generated terrain sequence.
