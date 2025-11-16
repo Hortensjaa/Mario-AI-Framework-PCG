@@ -1,8 +1,8 @@
-package levelGenerators.list3.generator;
+package levelGenerators.list3.structure;
 
 import java.util.Random;
 
-public class Plain extends Structure {
+public class Plain extends Terrain {
     private static final int MAX_WIDTH = 8;
     private static final int MIN_WIDTH = 3;
 
@@ -16,9 +16,7 @@ public class Plain extends Structure {
     }
 
     @Override
-    public void mutate() {
-        this.width = new Random().nextInt(MAX_WIDTH - MIN_WIDTH + 1) + MIN_WIDTH;
-    }
+    public void mutate() {}
 
     @Override
     public int generate(engine.core.MarioLevelModel model, int x, int floorLevel) {

@@ -1,10 +1,10 @@
-package levelGenerators.list3.generator;
+package levelGenerators.list3.structure;
 
 import engine.core.MarioLevelModel;
 import lombok.Data;
 
 @Data
-public abstract class Decorator {
+public abstract class Decorator implements Mutable {
     protected int width;
 
     public abstract void mutate();

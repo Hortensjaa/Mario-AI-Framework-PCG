@@ -1,9 +1,9 @@
-package levelGenerators.list3.generator;
+package levelGenerators.list3.structure;
 
 
 import java.util.Random;
 
-public class Gap extends Structure {
+public class Gap extends Terrain {
 
     public Gap(int width) {
         this.width = width;
@@ -15,9 +15,7 @@ public class Gap extends Structure {
     }
 
     @Override
-    public void mutate() {
-        this.width = new Random().nextInt(MAX_WIDTH - MIN_WIDTH + 1) + MIN_WIDTH;
-    }
+    public void mutate() {}
 
     @Override
     public int generate(engine.core.MarioLevelModel model, int x, int floorLevel) {

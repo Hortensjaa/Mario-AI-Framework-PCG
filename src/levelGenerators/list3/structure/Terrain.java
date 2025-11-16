@@ -1,10 +1,10 @@
-package levelGenerators.list3.generator;
+package levelGenerators.list3.structure;
 
 import engine.core.MarioLevelModel;
 import lombok.Data;
 
 @Data
-public abstract class Structure {
+public abstract class Terrain implements Mutable {
     protected static final int MAX_WIDTH = 4;
     protected static final int MIN_WIDTH = 1;
     protected static final int MAX_HEIGHT = 4;

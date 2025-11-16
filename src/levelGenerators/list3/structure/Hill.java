@@ -1,8 +1,8 @@
-package levelGenerators.list3.generator;
+package levelGenerators.list3.structure;
 
 import java.util.Random;
 
-public class Hill extends Structure {
+public class Hill extends Terrain {
 
     public Hill(int width, int height) {
         this.width = width;
@@ -18,7 +18,6 @@ public class Hill extends Structure {
 
     @Override
     public void mutate() {
-        this.width = new Random().nextInt(MAX_WIDTH - MIN_WIDTH + 1) + MIN_WIDTH;
         this.height = new Random().nextInt(MAX_HEIGHT - MIN_HEIGHT + 1) + MIN_HEIGHT;
     }
 

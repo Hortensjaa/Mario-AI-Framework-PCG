@@ -1,10 +1,10 @@
-package levelGenerators.list3.generator;
+package levelGenerators.list3.structure;
 
 import engine.core.MarioLevelModel;
 
 import java.util.Random;
 
-public class Pipe extends Structure {
+public class Pipe extends Terrain {
     private static final int MIN_HEIGHT = 2;
     char pipeType;
 

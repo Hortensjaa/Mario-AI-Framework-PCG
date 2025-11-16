@@ -79,7 +79,7 @@ public class GenerateLevel {
         MarioGame game = new MarioGame();
 
         /* todo choose map generator to create a level (uncomment the one you want to use): */
-        MarioLevelGenerator generator = new levelGenerators.list3.generator.RandomLevelGenerator();
+        MarioLevelGenerator generator = new levelGenerators.list3.optimization.HillClimbing();
 //        MarioLevelGenerator generator = new levelGenerators.notch.LevelGenerator();    // original generator by Notch
 //        MarioLevelGenerator generator = new levelGenerators.benWeber.LevelGenerator(); // winner of the 2010 PCG Mario AI Competition: makes multiple passes along the level, in each pass adding a new type of level item
 //        MarioLevelGenerator generator = new levelGenerators.linear.LevelGenerator();     // flat ground with holes, occasional pipes and monsters

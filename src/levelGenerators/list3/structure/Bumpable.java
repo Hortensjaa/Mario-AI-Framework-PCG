@@ -1,4 +1,4 @@
-package levelGenerators.list3.generator;
+package levelGenerators.list3.structure;
 
 import engine.core.MarioLevelModel;
 import lombok.AllArgsConstructor;
@@ -15,7 +15,6 @@ public class Bumpable extends Decorator {
     private static final int MAX_HEIGHT = 6;
     private static final int MIN_HEIGHT = 2;
 
-    private int width;
     private int height;
     private char bumpableType;
 
@@ -28,13 +27,9 @@ public class Bumpable extends Decorator {
 
     @Override
     public void mutate() {
-        this.width = new Random().nextInt(MAX_WIDTH - MIN_WIDTH + 1) + MIN_WIDTH;
         this.height = new Random().nextInt(MAX_HEIGHT - MIN_HEIGHT + 1) + MIN_HEIGHT;
-
-        if (new Random().nextDouble() < 0.3) {
-            char[] bumpableTypes = MarioLevelModel.getBumpableTiles();
-            this.bumpableType = bumpableTypes[new Random().nextInt(bumpableTypes.length)];
-        }
+        char[] bumpableTypes = MarioLevelModel.getBumpableTiles();
+        this.bumpableType = bumpableTypes[new Random().nextInt(bumpableTypes.length)];
     }
 
     @Override

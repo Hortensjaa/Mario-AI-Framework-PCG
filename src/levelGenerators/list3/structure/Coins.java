@@ -1,4 +1,4 @@
-package levelGenerators.list3.generator;
+package levelGenerators.list3.structure;
 
 import engine.core.MarioLevelModel;
 import lombok.Getter;
@@ -9,9 +9,9 @@ import java.util.Random;
 public class Coins extends Decorator {
     private static final int MAX_WIDTH = 5;
     private static final int MIN_WIDTH = 1;
-    private static final int MAX_HEIGHT = 5;
-    private static final int MIN_HEIGHT = 2;
-    private static final int MAX_SIZE = 4;
+    private static final int MAX_HEIGHT = 4;
+    private static final int MIN_HEIGHT = 1;
+    @Getter private static final int MAX_SIZE = 4;
 
     @Getter private int size;
     @Getter private int height;
@@ -30,9 +30,12 @@ public class Coins extends Decorator {
         this.size = s;
     }
 
+    public int getCoinsNumber() {
+        return this.width * this.size;
+    }
+
     @Override
     public void mutate() {
-        this.width = new Random().nextInt(MAX_WIDTH - MIN_WIDTH + 1) + MIN_WIDTH;
         this.height = new Random().nextInt(MAX_HEIGHT - MIN_HEIGHT + 1) + MIN_HEIGHT;
         this.size = new Random().nextInt(MAX_SIZE - 1) + 1;
     }
@@ -44,7 +47,7 @@ public class Coins extends Decorator {
         for (int i = 0; i < this.width; i++) {
             for (int h = 0; h < this.size; h++) {
                 int coinX = x + i;
-                int coinY = startY + h;
+                int coinY = startY - h;
                 if (coinX >= 0 && coinX < model.getWidth() && coinY >= 0 && coinY < model.getHeight()) {
                     model.setBlock(coinX, coinY, MarioLevelModel.COIN);
                 }

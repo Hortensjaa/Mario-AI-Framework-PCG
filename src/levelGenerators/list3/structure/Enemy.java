@@ -1,4 +1,4 @@
-package levelGenerators.list3.generator;
+package levelGenerators.list3.structure;
 
 import engine.core.MarioLevelModel;
 import lombok.AllArgsConstructor;
@@ -10,7 +10,7 @@ import java.util.Random;
 @Getter
 @AllArgsConstructor
 public class Enemy extends Decorator {
-    private static final int MAX_WIDTH = 5;
+    @Getter private static final int MAX_WIDTH = 5;
     private static final int MIN_WIDTH = 3;
 
     private char enemyType;
@@ -25,7 +25,6 @@ public class Enemy extends Decorator {
     public void mutate() {
         char[] enemyTypes = MarioLevelModel.getEnemyCharacters(false);
         this.enemyType = enemyTypes[new Random().nextInt(enemyTypes.length)];
-        this.width = new Random().nextInt(MAX_WIDTH - MIN_WIDTH + 1) + MIN_WIDTH;
     }
 
     @Override
