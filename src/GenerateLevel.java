@@ -6,7 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class GenerateLevel {
-    public static int TIMER = 500;
+    public static int TIMER = 30;
     public static int LEVEL_WIDTH = 150;
     public static int LEVEL_HEIGHT = 16;
 
@@ -87,7 +87,7 @@ public class GenerateLevel {
 //        MarioLevelGenerator generator = new levelGenerators.random.LevelGenerator();   // places objects randomly
 
         /* todo choose level from generator or file */
-        String level = generator.getGeneratedLevel(new MarioLevelModel(LEVEL_WIDTH, LEVEL_HEIGHT), new MarioTimer(5 * 60 * 60 * 1000));
+        String level = generator.getGeneratedLevel(new MarioLevelModel(LEVEL_WIDTH, LEVEL_HEIGHT), new MarioTimer(20 * 60 * 60 * 1000));
 //        String level = getLevel("./levels/original/lvl-1.txt");
 
 //        printLevel(level);
@@ -108,9 +108,9 @@ public class GenerateLevel {
 //        MarioAgent marioagent = new agents.collector.Agent();        // A* with bonus for collecting coins;  from: https://github.com/obsidian-zero/Mario-AI-Framework
 //        MarioAgent marioagent = new agents.killer.Agent();           // A* with bonus for defeating enemies; from: https://github.com/obsidian-zero/Mario-AI-Framework
 
-//        MarioResult runresult = game.runGame(marioagent, level, TIMER, 0, true);
+//        MarioResult runresult = game.runGame(marioagent, level, TIMER, 0, false);
 //        printResults(runresult);
 
-        runMultiple(generator, marioagent, 10, true);
+        runMultiple(generator, marioagent, 5, true);
     }
 }

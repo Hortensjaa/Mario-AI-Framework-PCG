@@ -1,6 +1,7 @@
 package levelGenerators.list3.optimization;
 
-import levelGenerators.list3.Evaluation;
+import levelGenerators.list3.evaluation.Evaluation;
+import levelGenerators.list3.evaluation.Weights;
 import levelGenerators.list3.structure.Decorator;
 import levelGenerators.list3.structure.LevelStructure;
 import levelGenerators.list3.structure.Terrain;
@@ -14,42 +15,51 @@ public class SimulatedAnnealing extends OptimizationAlgorithm {
     private static final int N = 1000;
 
     private float curTemp = TEMP_START;
-    private float bestScore = Integer.MIN_VALUE;
-    private LevelStructure bestLevel;
+
+    private float bestScoreHeuristic = Integer.MIN_VALUE;
+    private LevelStructure bestLevelHeuristic;
+
     private float curScore;
     private LevelStructure curLevel;
 
+    private float bestCumulativeScore = Integer.MIN_VALUE;
+    private float bestCumulativeHeuristicScore = Integer.MIN_VALUE;
+    private LevelStructure bestCumulativeLevel;
 
-    @Override
+
     public LevelStructure getBestLevel() {
         curLevel = generateSingleLevel();
-        bestLevel = curLevel;
-        curScore = Evaluation.task1Score(curLevel);
+        bestLevelHeuristic = curLevel;
+        curScore = Evaluation.task1heuristic(curLevel);
         for (curTemp = TEMP_START; curTemp > TEMP_END; curTemp *= ALPHA) {
             for (int i = 0; i < N; i++) {
                 LevelStructure candidate = mutateLevel(curLevel);
-                float candidateScore = Evaluation.task1Score(candidate);
+                float candidateScore = Evaluation.task1heuristic(candidate);
                 float diff = candidateScore - curScore;
                 if (diff > 0 || Math.exp(diff / curTemp) > rng.nextDouble()) {
                     curLevel = candidate;
                     curScore = candidateScore;
-                    if (curScore > bestScore) {
-                        bestLevel = curLevel;
-                        bestScore = curScore;
+                    if (curScore > bestScoreHeuristic) {
+                        bestLevelHeuristic = curLevel;
+                        bestScoreHeuristic = curScore;
                     }
                 }
             }
-        }
-        while (bestScore < 0) {
-            LevelStructure candidate = mutateLevel(curLevel);
-            float candidateScore = Evaluation.task1Score(candidate);
-            if (candidateScore > bestScore) {
-                bestLevel = candidate;
-                bestScore = candidateScore;
+            if (bestScoreHeuristic > 0) {
+                float res = Evaluation.task1simulation(bestLevelHeuristic);
+                float cumulative =
+                        (res/ Weights.TASK1_HEURISTIC_UPPER_BOUND) * 0.7f
+                        + (bestScoreHeuristic/ Weights.TASK1_HEURISTIC_UPPER_BOUND) * 0.3f;
+                float diff = cumulative - bestCumulativeScore;
+                if (diff > 0 || Math.exp(diff / curTemp) > rng.nextDouble()) {
+                    bestCumulativeScore = cumulative;
+                    bestCumulativeHeuristicScore = bestScoreHeuristic;
+                    bestCumulativeLevel = bestLevelHeuristic;
+                }
             }
+            System.out.println("Temp: " + curTemp + " Best score: " + bestCumulativeHeuristicScore + " Simulation: " + bestCumulativeScore);
         }
-        System.out.println(bestScore);
-        return bestLevel;
+        return bestCumulativeLevel;
     }
 
     @Override

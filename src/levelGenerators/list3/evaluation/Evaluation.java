@@ -1,5 +1,10 @@
-package levelGenerators.list3;
+package levelGenerators.list3.evaluation;
 
+import engine.core.MarioAgent;
+import engine.core.MarioGame;
+import engine.core.MarioLevelModel;
+import engine.core.MarioResult;
+import levelGenerators.list3.LevelRenderer;
 import levelGenerators.list3.structure.*;
 
 import java.util.List;
@@ -7,6 +12,7 @@ import java.util.List;
 
 public final class Evaluation {
     private final static int LEVEL_WIDTH = 150;
+    private final static int TIME_LIMIT = 10;
 
     // ---------------- helpers ----------------
     private static float countDecoratorsScore(LevelStructure level, Class<? extends Decorator> decoratorClass) {
@@ -16,7 +22,7 @@ public final class Evaluation {
                 c += 1;
             }
         }
-        return (float) c / level.getDecorators().size();
+        return (float) c / level.getDecorators().size() * 3;
     }
 
     private static float genericDiversity(LevelStructure level, List<? extends Mutable> list, List<Class<? extends Mutable>> types) {
@@ -48,8 +54,6 @@ public final class Evaluation {
         return (float) entropy; // between 0 and 1
     }
 
-
-
     private static float countEnemiesScore(LevelStructure level) {
         return countDecoratorsScore(level, Enemy.class);
     }
@@ -78,7 +82,7 @@ public final class Evaluation {
                 curDensity = 0;
             }
         }
-        return (float) numberOfGroups / LEVEL_WIDTH;
+        return (float) numberOfGroups / level.getDecorators().size();
     }
 
     /** Count gaps that are not passable (longer than 4) */
@@ -95,7 +99,7 @@ public final class Evaluation {
                 curGapLength = 0;
             }
         }
-        return (notPassableGapCount + (curGapLength > 4 ? 1 : 0));
+        return (notPassableGapCount + (curGapLength > 4 ? 1 : 0)) / (float) level.getTerrains().size();
     }
 
     /** Count jumps that are not passable (higher than 4) */
@@ -122,7 +126,7 @@ public final class Evaluation {
                 }
             }
         }
-        return (float) notPassableJumpCount;
+        return (float) notPassableJumpCount / (float) level.getTerrains().size();
     }
 
     /** Is gap a first terrain structure? */
@@ -194,34 +198,89 @@ public final class Evaluation {
 
     /** Number of different terrain structures overall and its proportion */
     private static float overallTerrainDiversity(LevelStructure level) {
-        List<Terrain> terrains = level.getTerrains(); // assume returns List<Terrain>
+        List<Terrain> terrains = level.getTerrains();
         List<Class<? extends Mutable>> types = List.of(Hill.class, BulletBill.class, Gap.class, Pipe.class, Plain.class);
         return genericDiversity(level, terrains, types);
     }
 
     /** Number of different decorators overall and its proportion */
     private static float overallDecorDiversity(LevelStructure level) {
-        List<Decorator> decors = level.getDecorators(); // assume returns List<Decorator>
+        List<Decorator> decors = level.getDecorators();
         List<Class<? extends Mutable>> types = List.of(Bumpable.class, Coins.class, Enemy.class, EmptyDecor.class);
         return genericDiversity(level, decors, types);
     }
 
-    // task1 - passability >= 99%
-    public static float task1Score(LevelStructure level) {
-        return (
-            + 15 * countEnemiesScore(level)
-            + 10 * countBlocksScore(level)
-            + 10 * countCoinsScore(level)
-            + 10 * overallTerrainDiversity(level)
-            + 10 * overallDecorDiversity(level)
-            - gapsNumberScore(level)
-            - 5 * enemyGroupsScore(level)
-            - 10 * monotonousTerrainPenalty(level)
-            - 10 * monotonousDecorPenalty(level)
-            - 50 * enemyFirstPenalty(level)
-            - 500 * notPassableGapsPenalty(level)
-            - 500 * notPassableJumpsPenalty(level)
-            - 1000 * gapFirstPenalty(level)
+    // ---------------- task heuristics ----------------
+    public static float task1heuristic(LevelStructure level) {
+
+        return
+            + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.TERRAIN_DIVERSITY)
+            * overallTerrainDiversity(level)
+
+            + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.DECOR_DIVERSITY)
+            * overallDecorDiversity(level)
+
+            + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.ENEMIES_COUNT)
+            * countEnemiesScore(level)
+
+            + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.BLOCKS_COUNT)
+            * countBlocksScore(level)
+
+            + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.COINS_COUNT)
+            * countCoinsScore(level)
+
+            + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.GAPS_NUMBER)
+            * gapsNumberScore(level)
+
+            + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.ENEMY_GROUPS)
+            * enemyGroupsScore(level)
+
+            + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.MONO_TERRAIN)
+            * monotonousTerrainPenalty(level)
+
+            + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.MONO_DECOR)
+            * monotonousDecorPenalty(level)
+
+            + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.ENEMY_FIRST)
+            * enemyFirstPenalty(level)
+
+            + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.NOT_PASSABLE_GAPS)
+            * notPassableGapsPenalty(level)
+
+            + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.NOT_PASSABLE_JUMPS)
+            * notPassableJumpsPenalty(level)
+
+            + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.GAP_FIRST)
+            * gapFirstPenalty(level);
+    }
+
+
+    // ---------------- task simulations ----------------
+    public static float task1simulation(LevelStructure level) {
+        MarioLevelModel model = new MarioLevelModel(LEVEL_WIDTH, 16);
+        String renderedLevel = new LevelRenderer().getRenderedLevel(
+                model, level.getTerrains(), level.getDecorators()
         );
+        MarioAgent marioagent = new agents.robinBaumgarten.Agent();
+        MarioGame game = new MarioGame();
+        MarioResult result = game.runGame(marioagent, renderedLevel, TIME_LIMIT, 0, false);
+
+        int notPassedPenalty = result.getCompletionPercentage() == 1.0f ? 0 : 1;
+
+        return
+            + Weights.TASK1_SIMULATION_WEIGHTS.get(SimulationComponent.COMPLETION)
+            * result.getCompletionPercentage()
+
+            + Weights.TASK1_SIMULATION_WEIGHTS.get(SimulationComponent.KILLS)
+            * (result.getKillsTotal() / 5.0f)
+
+            + Weights.TASK1_SIMULATION_WEIGHTS.get(SimulationComponent.JUMPS)
+            * (result.getNumJumps() / 15.0f)
+
+            + Weights.TASK1_SIMULATION_WEIGHTS.get(SimulationComponent.COINS)
+            * (result.getNumCollectedTileCoins() / 30.0f)
+
+            + Weights.TASK1_SIMULATION_WEIGHTS.get(SimulationComponent.NOT_PASSED)
+            * notPassedPenalty;
     }
 }
