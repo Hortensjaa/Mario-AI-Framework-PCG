@@ -24,6 +24,7 @@ public final class RandomLevelCreator {
      */
     public List<Terrain> generateStructuresList(int levelWidth) {
         List<Terrain> terrains = new ArrayList<>();
+        terrains.add(new Plain());
 
         int remainingWidth = levelWidth;
 
@@ -67,12 +68,13 @@ public final class RandomLevelCreator {
      * Generate a random terrain
      */
     public Terrain getRandomTerrain() {
-        int choice = random.nextInt(4);
+        int choice = random.nextInt(5);
         return switch (choice) {
             case 0 -> new Gap();
             case 1 -> new Plain();
             case 2 -> new Pipe();
             case 3 -> new Hill();
+            case 4 -> new BulletBill();
             default -> new Plain();
         };
     }

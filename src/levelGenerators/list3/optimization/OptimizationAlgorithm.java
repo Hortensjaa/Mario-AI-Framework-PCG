@@ -30,31 +30,35 @@ public abstract class OptimizationAlgorithm implements MarioLevelGenerator {
 
     public abstract LevelStructure getBestLevel();
 
-    protected abstract LevelStructure mutateLevel(LevelStructure level, float mutationChance);
+    protected abstract LevelStructure mutateLevel(LevelStructure level);
 
     protected static LevelStructure generateSingleLevel() {
         return new RandomLevelCreator().generateLevelStructure(LEVEL_WIDTH);
     }
 
-    // mutation types
+    // ------------------ mutation types ------------------
+    /** swap two decorators */
     protected List<Decorator> swapDecorators(List<Decorator> decorators) {
         List<Decorator> newDecorators = new ArrayList<>(decorators);
         swapRandom(newDecorators, rng);
         return newDecorators;
     }
 
+    /** swap two terrain elements */
     protected List<Terrain> swapTerrains(List<Terrain> terrains) {
         List<Terrain> newTerrains = new ArrayList<>(terrains);
         swapRandom(newTerrains, rng);
         return newTerrains;
     }
 
+    /** replace one decorator element by another */
     protected List<Decorator> replaceDecorator(List<Decorator> decorators) {
         List<Decorator> newDecorators = new ArrayList<>(decorators);
         replace(newDecorators, creator::getRandomDecorator, rng);
         return newDecorators;
     }
 
+    /** replace one terrain element by another */
     protected List<Terrain> replaceTerrain(List<Terrain> terrains) {
         List<Terrain> newTerrains = new ArrayList<>(terrains);
         int id = replace(newTerrains, creator::getRandomTerrain, rng);
@@ -70,12 +74,40 @@ public abstract class OptimizationAlgorithm implements MarioLevelGenerator {
                 newTerrains.set(id, new Plain(w));
             }
         }
+        // special case - bullet bill has to have width 1
+        if (newTerrain instanceof BulletBill) {
+            int w = newTerrain.getWidth();
+            if (w > 1) {
+                newTerrain.setWidth(1);
+                newTerrains.add(id + 1, new Plain(w - 1));
+            }
+        }
         return newTerrains;
     }
 
-    // mutation generics
-    private <T extends Mutable> int replace(List<T> list, Supplier<T> supplier, Random rng) {
+    /** mutate random decorator */
+    protected List<Decorator> mutateRandomDecorators(List<Decorator> decorators) {
+        List<Decorator> newDecorators = new ArrayList<>(decorators);
+        mutateRandomElements(newDecorators, rng);
+        return newDecorators;
+    }
+
+    /** mutate random terrain */
+    protected List<Terrain> mutateRandomTerrains(List<Terrain> terrains) {
+        List<Terrain> newTerrains = new ArrayList<>(terrains);
+        mutateRandomElements(newTerrains, rng);
+        return newTerrains;
+    }
+
+    // ------------- mutation generics -------------
+    private <T extends Mutable> void mutateRandomElements(List<T> list,  Random rng) {
         int index = rng.nextInt(list.size());
+        Mutable elem = list.get(index);
+        elem.mutate();
+    }
+
+    private <T extends Mutable> int replace(List<T> list, Supplier<T> supplier, Random rng) {
+        int index = rng.nextInt(list.size() - 1) + 1;
         int w = list.get(index).getWidth();
         T newItem = supplier.get();
         newItem.setWidth(w);
@@ -86,8 +118,8 @@ public abstract class OptimizationAlgorithm implements MarioLevelGenerator {
     private static <T> void swapRandom(List<T> list, Random rng) {
         int size = list.size();
         if (size < 2) return;
-        int i = rng.nextInt(size);
-        int j = rng.nextInt(size);
+        int i = rng.nextInt(size - 1) + 1;
+        int j = rng.nextInt(size - 1) + 1;
         while (j == i) {
             j = rng.nextInt(size);
         }

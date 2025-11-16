@@ -8,11 +8,13 @@ import levelGenerators.list3.structure.Terrain;
 import java.util.List;
 
 public class HillClimbing extends OptimizationAlgorithm {
-    protected final static int GENERATIONS = 2500;
-    protected final static float INITIAL_MUTATION_CHANCE = 0.99f;
-    protected final static float MUTATION_CHANCE_MULTIPLIER = 0.998f;
-    protected final static float SMALL_MUTATIONS_THRESHOLD = 0.2f;
+    protected final static int GENERATIONS = 10000;
+    protected final static float INITIAL_MUTATION_CHANCE = 10.0f;
+    protected final static float MUTATION_CHANCE_MULTIPLIER = 0.999f;
+    protected final static float MIN_MUTATION_CHANCE = 0.1f;
+    protected final static float SMALL_MUTATIONS_THRESHOLD = 0.1f;
 
+    private float mutationChance = INITIAL_MUTATION_CHANCE;
     private float bestScore = Integer.MIN_VALUE;
     private LevelStructure bestLevel;
     private float curScore;
@@ -23,10 +25,9 @@ public class HillClimbing extends OptimizationAlgorithm {
         curLevel = generateSingleLevel();
         bestLevel = curLevel;
         curScore = Evaluation.task1Score(curLevel);
-        float mutationChance = INITIAL_MUTATION_CHANCE;
         int generation = 0;
         while (generation < GENERATIONS) {
-            LevelStructure mutatedLevel = mutateLevel(curLevel, mutationChance);
+            LevelStructure mutatedLevel = mutateLevel(curLevel);
             float mutatedScore = Evaluation.task1Score(mutatedLevel);
             if (mutatedScore > curScore) {
                 curLevel = mutatedLevel;
@@ -43,7 +44,7 @@ public class HillClimbing extends OptimizationAlgorithm {
     }
 
     @Override
-    protected LevelStructure mutateLevel(LevelStructure level, float mutationChance) {
+    protected LevelStructure mutateLevel(LevelStructure level) {
         List<Decorator> decorators = level.getDecorators();
         List<Terrain> terrains = level.getTerrains();
 
