@@ -33,6 +33,7 @@ public class SimulatedAnnealing extends OptimizationAlgorithm {
         curLevel = generateSingleLevel();
         bestLevelHeuristic = curLevel;
         curScore = Evaluation.task1heuristic(curLevel);
+        int j = 0;
         for (curTemp = TEMP_START; curTemp > TEMP_END; curTemp *= ALPHA) {
             for (int i = 0; i < N; i++) {
                 LevelStructure candidate = mutateLevel(curLevel);
@@ -47,13 +48,14 @@ public class SimulatedAnnealing extends OptimizationAlgorithm {
                     }
                 }
             }
-            if (bestScoreHeuristic > 0) {
+            j += 1;
+            if (bestScoreHeuristic > 0 && j % 100 == 0) {
                 float res = Evaluation.task1simulation(bestLevelHeuristic);
                 float cumulative =
                         (res/ Weights.TASK1_SIMULATION_UPPER_BOUND) * 0.7f
                         + (bestScoreHeuristic/ Weights.TASK1_HEURISTIC_UPPER_BOUND) * 0.3f;
                 float diff = cumulative - bestCumulativeScore;
-                if (diff > 0 || Math.exp(diff / curTemp) > rng.nextDouble()) {
+                if (diff > 0 || (Math.exp(diff / curTemp) > rng.nextDouble() && cumulative * bestCumulativeScore > 0)) {
                     bestCumulativeScore = cumulative;
                     bestCumulativeHeuristicScore = bestScoreHeuristic;
                     bestCumulativeSimulationScore = res;
@@ -92,6 +94,6 @@ public class SimulatedAnnealing extends OptimizationAlgorithm {
 
     @Override
     public String getGeneratorName() {
-        return "SimulatedAnnealingWithSimulation";
+        return "SimulatedAnnealing1";
     }
 }
