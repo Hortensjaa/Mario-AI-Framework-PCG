@@ -8,24 +8,32 @@ import levelGenerators.list3.LevelRenderer;
 import levelGenerators.list3.structure.*;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 
 public final class Evaluation {
     private final static int LEVEL_WIDTH = 150;
     private final static int TIME_LIMIT = 10;
+    private final static int NUMBER_OF_TERRAINS = 5;
+    private final static int NUMBER_OF_DECORATORS = 4;
 
     // ---------------- helpers ----------------
-    private static float countDecoratorsScore(LevelStructure level, Class<? extends Decorator> decoratorClass) {
+    private static <T> float countSelectedScore(
+            Class<? extends T> selectedClass,
+            Supplier<? extends List<T>> supplier,
+            int numberOfTypes
+    ) {
+        List<T> list = supplier.get();
         int c = 0;
-        for (var decorator : level.getDecorators()) {
-            if (decoratorClass.isInstance(decorator)) {
+        for (var item : list) {
+            if (selectedClass.isInstance(item)) {
                 c += 1;
             }
         }
-        return (float) c / level.getDecorators().size() * 3;
+        return (float) c / list.size() * numberOfTypes;
     }
 
-    private static float genericDiversity(LevelStructure level, List<? extends Mutable> list, List<Class<? extends Mutable>> types) {
+    private static float genericDiversity(List<? extends Mutable> list, List<Class<? extends Mutable>> types) {
         int numTypes = types.size();
         int[] counts = new int[numTypes];
 
@@ -54,18 +62,37 @@ public final class Evaluation {
         return (float) entropy; // between 0 and 1
     }
 
+    // Counting methods using generic countSelectedScore
     private static float countEnemiesScore(LevelStructure level) {
-        return countDecoratorsScore(level, Enemy.class);
+        return countSelectedScore(Enemy.class, level::getDecorators, NUMBER_OF_DECORATORS);
     }
 
-    /** Count blocks with coins and divide its number by the number of all decorators */
-    private static float countCoinsScore(LevelStructure level) {
-        return countDecoratorsScore(level, Coins.class);
-    }
-
-    /** Count bumpable blocks and divide its number by the number of all decorators */
     private static float countBlocksScore(LevelStructure level) {
-        return countDecoratorsScore(level, Bumpable.class);
+        return countSelectedScore(Bumpable.class, level::getDecorators, NUMBER_OF_DECORATORS);
+    }
+
+    private static float countCoinsScore(LevelStructure level) {
+        return countSelectedScore(Coins.class, level::getDecorators, NUMBER_OF_DECORATORS);
+    }
+
+    private static float countGapsScore(LevelStructure level) {
+        return countSelectedScore(Gap.class, level::getTerrains, NUMBER_OF_TERRAINS);
+    }
+
+    private static float countHillsScore(LevelStructure level) {
+        return countSelectedScore(Hill.class, level::getTerrains, NUMBER_OF_TERRAINS);
+    }
+
+    private static float countPlainsScore(LevelStructure level) {
+        return countSelectedScore(Plain.class, level::getTerrains, NUMBER_OF_TERRAINS);
+    }
+
+    private static float countBillsScore(LevelStructure level) {
+        return countSelectedScore(BulletBill.class, level::getTerrains, NUMBER_OF_TERRAINS);
+    }
+
+    private static float countPipesScore(LevelStructure level) {
+        return countSelectedScore(Pipe.class, level::getTerrains, NUMBER_OF_TERRAINS);
     }
 
     /** Count enemy groups (3 or more enemies in a row) and divide its number by the number of all decorators */
@@ -145,69 +172,47 @@ public final class Evaluation {
         return 0;
     }
 
-    /** Penalty for monotonous terrain fragments (same type or height) */
-    private static float monotonousTerrainPenalty(LevelStructure level) {
-        // square of length of monotonous fragments
-        int penalty = 0;
-        int curLength = 1;
+    /** Check for monotonous terrain fragments (same type or height) */
+    private static float localTerrainDiversity(LevelStructure level) {
+        int s = 0;
         List<Terrain> terrains = level.getTerrains();
         int size = terrains.size();
         for (int i = 1; i < size; i++) {
-            if (terrains.get(i).getClass() == terrains.get(i - 1).getClass()) {
-                curLength += 1;
-            } else if (terrains.get(i).getHeight() == terrains.get(i - 1).getHeight()) {
-                curLength += 1;
-            } else {
-                penalty += (curLength - 1) * (curLength - 1);
-                curLength = 1;
+            if (
+                    terrains.get(i).getClass() != terrains.get(i - 1).getClass()
+                    && terrains.get(i).getHeight() != terrains.get(i - 1).getHeight()
+            ) {
+                s += 1;
             }
         }
-        penalty += (curLength - 1) * (curLength - 1);
-        return (float) Math.sqrt((double) penalty / (size * size));
+        return (float) s / terrains.size();
     }
 
     /** Penalty for monotonous decor fragments (same type) */
-    private static float monotonousDecorPenalty(LevelStructure level) {
-        // square of length of monotonous fragments
-        int penalty = 0;
-        int curLength = 1;
-        List <Decorator> decorators = level.getDecorators();
+    private static float localDecorDiversity(LevelStructure level) {
+        int s = 0;
+        List<Decorator> decorators = level.getDecorators();
         int size = decorators.size();
         for (int i = 1; i < size; i++) {
-            if (decorators.get(i).getClass() == decorators.get(i - 1).getClass()) {
-                curLength += 1;
-            } else {
-                penalty += (curLength - 1) * (curLength - 1);
-                curLength = 1;
+            if (decorators.get(i).getClass() != decorators.get(i - 1).getClass()) {
+                s += 1;
             }
         }
-        penalty += (curLength - 1) * (curLength - 1);
-        return (float) Math.sqrt((double) penalty / (size * size));
-    }
-
-    /** Number of gaps overall and its proportion */
-    private static float gapsNumberScore(LevelStructure level) {
-        int c = 0;
-        for (var t : level.getTerrains()) {
-            if (t instanceof Gap) {
-                c += 1;
-            }
-        }
-        return (float) c / level.getTerrains().size();
+        return (float) s / decorators.size();
     }
 
     /** Number of different terrain structures overall and its proportion */
     private static float overallTerrainDiversity(LevelStructure level) {
         List<Terrain> terrains = level.getTerrains();
         List<Class<? extends Mutable>> types = List.of(Hill.class, BulletBill.class, Gap.class, Pipe.class, Plain.class);
-        return genericDiversity(level, terrains, types);
+        return genericDiversity(terrains, types);
     }
 
     /** Number of different decorators overall and its proportion */
     private static float overallDecorDiversity(LevelStructure level) {
         List<Decorator> decors = level.getDecorators();
         List<Class<? extends Mutable>> types = List.of(Bumpable.class, Coins.class, Enemy.class, EmptyDecor.class);
-        return genericDiversity(level, decors, types);
+        return genericDiversity(decors, types);
     }
 
     // ---------------- task heuristics ----------------
@@ -220,6 +225,12 @@ public final class Evaluation {
             + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.DECOR_DIVERSITY)
             * overallDecorDiversity(level)
 
+            + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.LOCAL_TERRAIN_DIVERSITY)
+            * localTerrainDiversity(level)
+
+            + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.LOCAL_DECOR_DIVERSITY)
+            * localDecorDiversity(level)
+
             + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.ENEMIES_COUNT)
             * countEnemiesScore(level)
 
@@ -229,17 +240,23 @@ public final class Evaluation {
             + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.COINS_COUNT)
             * countCoinsScore(level)
 
-            + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.GAPS_NUMBER)
-            * gapsNumberScore(level)
+            + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.GAPS_COUNT)
+            * countGapsScore(level)
+
+            + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.HILLS_COUNT)
+            * countHillsScore(level)
+
+            + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.PLAINS_COUNT)
+            * countPlainsScore(level)
+
+            + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.PIPES_COUNT)
+            * countPipesScore(level)
+
+            + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.BILLS_COUNT)
+            * countBillsScore(level)
 
             + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.ENEMY_GROUPS)
             * enemyGroupsScore(level)
-
-            + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.MONO_TERRAIN)
-            * monotonousTerrainPenalty(level)
-
-            + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.MONO_DECOR)
-            * monotonousDecorPenalty(level)
 
             + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.ENEMY_FIRST)
             * enemyFirstPenalty(level)

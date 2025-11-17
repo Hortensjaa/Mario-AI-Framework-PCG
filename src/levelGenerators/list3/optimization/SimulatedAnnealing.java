@@ -7,6 +7,7 @@ import levelGenerators.list3.structure.LevelStructure;
 import levelGenerators.list3.structure.Terrain;
 
 import java.util.List;
+import java.util.Random;
 
 public class SimulatedAnnealing extends OptimizationAlgorithm {
     private static final float TEMP_START = 10.0f;
@@ -24,6 +25,7 @@ public class SimulatedAnnealing extends OptimizationAlgorithm {
 
     private float bestCumulativeScore = Integer.MIN_VALUE;
     private float bestCumulativeHeuristicScore = Integer.MIN_VALUE;
+    private float bestCumulativeSimulationScore = Integer.MIN_VALUE;
     private LevelStructure bestCumulativeLevel;
 
 
@@ -48,18 +50,28 @@ public class SimulatedAnnealing extends OptimizationAlgorithm {
             if (bestScoreHeuristic > 0) {
                 float res = Evaluation.task1simulation(bestLevelHeuristic);
                 float cumulative =
-                        (res/ Weights.TASK1_HEURISTIC_UPPER_BOUND) * 0.7f
+                        (res/ Weights.TASK1_SIMULATION_UPPER_BOUND) * 0.7f
                         + (bestScoreHeuristic/ Weights.TASK1_HEURISTIC_UPPER_BOUND) * 0.3f;
                 float diff = cumulative - bestCumulativeScore;
                 if (diff > 0 || Math.exp(diff / curTemp) > rng.nextDouble()) {
                     bestCumulativeScore = cumulative;
                     bestCumulativeHeuristicScore = bestScoreHeuristic;
+                    bestCumulativeSimulationScore = res;
                     bestCumulativeLevel = bestLevelHeuristic;
                 }
             }
-            System.out.println("Temp: " + curTemp + " Best score: " + bestCumulativeHeuristicScore + " Simulation: " + bestCumulativeScore);
         }
-        return bestCumulativeLevel;
+        if (bestCumulativeSimulationScore <= 0) {
+            rng.setSeed(System.currentTimeMillis());
+            return getBestLevel();
+        }
+        System.out.println("BEST LEVEL CHOOSED! Cumulative: " + bestCumulativeScore
+                + " Heuristic: " + bestCumulativeHeuristicScore + " Simulation: " + bestCumulativeSimulationScore);
+        if (bestCumulativeLevel != null) {
+            return bestCumulativeLevel;
+        }
+        System.out.println("Heuristic level: " + bestScoreHeuristic);
+        return bestLevelHeuristic;
     }
 
     @Override
@@ -80,6 +92,6 @@ public class SimulatedAnnealing extends OptimizationAlgorithm {
 
     @Override
     public String getGeneratorName() {
-        return "SimulatedAnnealingGenerator";
+        return "SimulatedAnnealingWithSimulation";
     }
 }
