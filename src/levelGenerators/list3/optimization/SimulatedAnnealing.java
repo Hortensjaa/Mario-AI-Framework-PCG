@@ -1,5 +1,6 @@
 package levelGenerators.list3.optimization;
 
+import engine.core.MarioAgent;
 import levelGenerators.list3.evaluation.Evaluation;
 import levelGenerators.list3.evaluation.Weights;
 import levelGenerators.list3.structure.Decorator;
@@ -7,9 +8,9 @@ import levelGenerators.list3.structure.LevelStructure;
 import levelGenerators.list3.structure.Terrain;
 
 import java.util.List;
-import java.util.Random;
+import java.util.function.Supplier;
 
-public class SimulatedAnnealing extends OptimizationAlgorithm {
+public abstract class SimulatedAnnealing extends OptimizationAlgorithm {
     private static final float TEMP_START = 10.0f;
     private static final float TEMP_END = 0.001f;
     private static final float ALPHA = 0.97f;
@@ -29,15 +30,19 @@ public class SimulatedAnnealing extends OptimizationAlgorithm {
     private LevelStructure bestCumulativeLevel;
 
 
-    public LevelStructure getBestLevel() {
+    public LevelStructure getBestLevel(
+            Weights weights,
+            Supplier<MarioAgent> agent,
+            int maxTries
+    ) {
         curLevel = generateSingleLevel();
         bestLevelHeuristic = curLevel;
-        curScore = Evaluation.task1heuristic(curLevel);
+        curScore = Evaluation.heuristic(curLevel, weights);
         int j = 0;
         for (curTemp = TEMP_START; curTemp > TEMP_END; curTemp *= ALPHA) {
             for (int i = 0; i < N; i++) {
                 LevelStructure candidate = mutateLevel(curLevel);
-                float candidateScore = Evaluation.task1heuristic(candidate);
+                float candidateScore = Evaluation.heuristic(candidate, weights);
                 float diff = candidateScore - curScore;
                 if (diff > 0 || Math.exp(diff / curTemp) > rng.nextDouble()) {
                     curLevel = candidate;
@@ -50,10 +55,10 @@ public class SimulatedAnnealing extends OptimizationAlgorithm {
             }
             j += 1;
             if (bestScoreHeuristic > 0 && j % 100 == 0) {
-                float res = Evaluation.task1simulation(bestLevelHeuristic);
+                float res = Evaluation.simulation(bestLevelHeuristic, agent.get(), weights);
                 float cumulative =
-                        (res/ Weights.TASK1_SIMULATION_UPPER_BOUND) * 0.7f
-                        + (bestScoreHeuristic/ Weights.TASK1_HEURISTIC_UPPER_BOUND) * 0.3f;
+                        (res / weights.getSimulationUpperBound()) * 0.7f
+                        + (bestScoreHeuristic / weights.getHeuristicUpperBound()) * 0.3f;
                 float diff = cumulative - bestCumulativeScore;
                 if (diff > 0 || (Math.exp(diff / curTemp) > rng.nextDouble() && cumulative * bestCumulativeScore > 0)) {
                     bestCumulativeScore = cumulative;
@@ -63,9 +68,13 @@ public class SimulatedAnnealing extends OptimizationAlgorithm {
                 }
             }
         }
-        if (bestCumulativeSimulationScore <= 0) {
+        if (bestCumulativeSimulationScore <= 0 && maxTries > 0) {
             rng.setSeed(System.currentTimeMillis());
-            return getBestLevel();
+            return getBestLevel(
+                    weights,
+                    agent,
+                    maxTries - 1
+            );
         }
         System.out.println("BEST LEVEL CHOOSED! Cumulative: " + bestCumulativeScore
                 + " Heuristic: " + bestCumulativeHeuristicScore + " Simulation: " + bestCumulativeSimulationScore);
@@ -90,10 +99,5 @@ public class SimulatedAnnealing extends OptimizationAlgorithm {
             case 5 -> terrains = mutateRandomTerrains(terrains);
         }
         return new LevelStructure(terrains, decorators);
-    }
-
-    @Override
-    public String getGeneratorName() {
-        return "SimulatedAnnealing1";
     }
 }

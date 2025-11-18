@@ -54,7 +54,16 @@ public abstract class OptimizationAlgorithm implements MarioLevelGenerator {
     /** replace one decorator element by another */
     protected List<Decorator> replaceDecorator(List<Decorator> decorators) {
         List<Decorator> newDecorators = new ArrayList<>(decorators);
-        replace(newDecorators, creator::getRandomDecorator, rng);
+        int id = replace(newDecorators, creator::getRandomDecorator, rng);
+        Decorator newDecor = newDecorators.get(id);
+        if (newDecor instanceof Enemy) {
+            int w = newDecor.getWidth();
+            int diff = w - 1;
+            if (diff > 0) {
+                newDecorators.add(id + 1, new EmptyDecor(diff));
+                newDecor.setWidth(1);
+            }
+        }
         return newDecorators;
     }
 

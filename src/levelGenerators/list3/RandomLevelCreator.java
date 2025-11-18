@@ -47,6 +47,7 @@ public final class RandomLevelCreator {
      */
     public List<Decorator> generateDecoratorsList(int levelWidth) {
         List<Decorator> decorators = new ArrayList<>();
+        decorators.add(new EmptyDecor());
 
         int remainingWidth = levelWidth;
 

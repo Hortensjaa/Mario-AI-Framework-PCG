@@ -13,7 +13,7 @@ import java.util.function.Supplier;
 
 public final class Evaluation {
     private final static int LEVEL_WIDTH = 150;
-    private final static int TIME_LIMIT = 10;
+    private final static int TIME_LIMIT = 30;
     private final static int NUMBER_OF_TERRAINS = 5;
     private final static int NUMBER_OF_DECORATORS = 4;
 
@@ -94,6 +94,53 @@ public final class Evaluation {
     private static float countPipesScore(LevelStructure level) {
         return countSelectedScore(Pipe.class, level::getTerrains, NUMBER_OF_TERRAINS);
     }
+
+    private static float widerTerrainsBonus(LevelStructure level) {
+        int totalWidthSquare = 0;
+        for (var terrain : level.getTerrains()) {
+            totalWidthSquare += terrain.getWidth() * terrain.getWidth();
+        }
+        return (float) Math.sqrt((double) totalWidthSquare / (LEVEL_WIDTH * LEVEL_WIDTH)) * 10.0f;
+    }
+
+//    private static float enemyDistanceFromGapBonus(LevelStructure level) {
+//        List<Terrain> terrains = level.getTerrains();
+//        List<Decorator> decorators = level.getDecorators();
+//        Terrain currentTerrain = terrains.getFirst();
+//        Decorator currentDecorator = decorators.getFirst();
+//        int terrainStepsLeft = currentTerrain.getWidth();
+//        int decoratorStepsLeft = currentDecorator.getWidth();
+//        int currentDecoratorIndex = 0;
+//        int currentTerrainIndex = 0;
+//        int distanceFromGap = Integer.MAX_VALUE;
+//        for (int x = 0; x < LEVEL_WIDTH; x++) {
+//            if (currentTerrain instanceof Gap && currentDecorator instanceof Enemy) {
+//                return 1.0f - (x / (float) LEVEL_WIDTH);
+//            }
+////           move forward on terrain
+//            terrainStepsLeft -= 1;
+//            if (terrainStepsLeft == 0) {
+//                currentTerrainIndex += 1;
+//                if (currentTerrainIndex >= terrains.size()) {
+//                    break;
+//                }
+//                currentTerrain = terrains.get(currentTerrainIndex);
+//                terrainStepsLeft = currentTerrain.getWidth();
+//            }
+////            move forward on decorator
+//            decoratorStepsLeft -= 1;
+//            if (decoratorStepsLeft == 0) {
+//                currentDecoratorIndex += 1;
+//                if (currentDecoratorIndex >= decorators.size()) {
+//                    break;
+//                }
+//                currentTerrain = decorators.get(currentDecoratorIndex);
+//                terrainStepsLeft = currentTerrain.getWidth();
+//            }
+//
+//        }
+//        return 0;
+//    }
 
     /** Count enemy groups (3 or more enemies in a row) and divide its number by the number of all decorators */
     private static float enemyGroupsScore(LevelStructure level) {
@@ -188,7 +235,7 @@ public final class Evaluation {
         return (float) s / terrains.size();
     }
 
-    /** Penalty for monotonous decor fragments (same type) */
+    /** Check for monotonous decor fragments (same type) */
     private static float localDecorDiversity(LevelStructure level) {
         int s = 0;
         List<Decorator> decorators = level.getDecorators();
@@ -216,88 +263,92 @@ public final class Evaluation {
     }
 
     // ---------------- task heuristics ----------------
-    public static float task1heuristic(LevelStructure level) {
+    public static float heuristic(LevelStructure level, Weights weights) {
+        var w = weights.getHeuristicWeights();
 
         return
-            + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.TERRAIN_DIVERSITY)
+            + w.getOrDefault(HeuristicComponent.TERRAIN_DIVERSITY, 0.0f)
             * overallTerrainDiversity(level)
 
-            + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.DECOR_DIVERSITY)
+            + w.getOrDefault(HeuristicComponent.DECOR_DIVERSITY, 0.0f)
             * overallDecorDiversity(level)
 
-            + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.LOCAL_TERRAIN_DIVERSITY)
+            + w.getOrDefault(HeuristicComponent.LOCAL_TERRAIN_DIVERSITY, 0.0f)
             * localTerrainDiversity(level)
 
-            + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.LOCAL_DECOR_DIVERSITY)
+            + w.getOrDefault(HeuristicComponent.LOCAL_DECOR_DIVERSITY, 0.0f)
             * localDecorDiversity(level)
 
-            + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.ENEMIES_COUNT)
+            + w.getOrDefault(HeuristicComponent.ENEMIES_COUNT, 0.0f)
             * countEnemiesScore(level)
 
-            + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.BLOCKS_COUNT)
+            + w.getOrDefault(HeuristicComponent.BLOCKS_COUNT, 0.0f)
             * countBlocksScore(level)
 
-            + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.COINS_COUNT)
+            + w.getOrDefault(HeuristicComponent.COINS_COUNT, 0.0f)
             * countCoinsScore(level)
 
-            + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.GAPS_COUNT)
+            + w.getOrDefault(HeuristicComponent.GAPS_COUNT, 0.0f)
             * countGapsScore(level)
 
-            + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.HILLS_COUNT)
+            + w.getOrDefault(HeuristicComponent.HILLS_COUNT, 0.0f)
             * countHillsScore(level)
 
-            + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.PLAINS_COUNT)
+            + w.getOrDefault(HeuristicComponent.PLAINS_COUNT, 0.0f)
             * countPlainsScore(level)
 
-            + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.PIPES_COUNT)
+            + w.getOrDefault(HeuristicComponent.PIPES_COUNT, 0.0f)
             * countPipesScore(level)
 
-            + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.BILLS_COUNT)
+            + w.getOrDefault(HeuristicComponent.BILLS_COUNT, 0.0f)
             * countBillsScore(level)
 
-            + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.ENEMY_GROUPS)
+            + w.getOrDefault(HeuristicComponent.WIDER_TERRAINS_BONUS, 0.0f)
+            * widerTerrainsBonus(level)
+
+            + w.getOrDefault(HeuristicComponent.ENEMY_GROUPS, 0.0f)
             * enemyGroupsScore(level)
 
-            + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.ENEMY_FIRST)
+            + w.getOrDefault(HeuristicComponent.ENEMY_FIRST, 0.0f)
             * enemyFirstPenalty(level)
 
-            + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.NOT_PASSABLE_GAPS)
+            + w.getOrDefault(HeuristicComponent.NOT_PASSABLE_GAPS, 0.0f)
             * notPassableGapsPenalty(level)
 
-            + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.NOT_PASSABLE_JUMPS)
+            + w.getOrDefault(HeuristicComponent.NOT_PASSABLE_JUMPS, 0.0f)
             * notPassableJumpsPenalty(level)
 
-            + Weights.TASK1_HEURISTIC_WEIGHTS.get(HeuristicComponent.GAP_FIRST)
+            + w.getOrDefault(HeuristicComponent.GAP_FIRST, 0.0f)
             * gapFirstPenalty(level);
     }
 
 
     // ---------------- task simulations ----------------
-    public static float task1simulation(LevelStructure level) {
+    public static float simulation(LevelStructure level, MarioAgent marioagent, Weights weights) {
         MarioLevelModel model = new MarioLevelModel(LEVEL_WIDTH, 16);
         String renderedLevel = new LevelRenderer().getRenderedLevel(
                 model, level.getTerrains(), level.getDecorators()
         );
-        MarioAgent marioagent = new agents.robinBaumgarten.Agent();
         MarioGame game = new MarioGame();
         MarioResult result = game.runGame(marioagent, renderedLevel, TIME_LIMIT, 0, false);
 
         int notPassedPenalty = result.getCompletionPercentage() == 1.0f ? 0 : 1;
+        var w = weights.getSimulationWeights();
 
         return
-            + Weights.TASK1_SIMULATION_WEIGHTS.get(SimulationComponent.COMPLETION)
+            + w.getOrDefault(SimulationComponent.COMPLETION, 0.0f)
             * result.getCompletionPercentage()
 
-            + Weights.TASK1_SIMULATION_WEIGHTS.get(SimulationComponent.KILLS)
+            + w.getOrDefault(SimulationComponent.KILLS, 0.0f)
             * (result.getKillsTotal() / 5.0f)
 
-            + Weights.TASK1_SIMULATION_WEIGHTS.get(SimulationComponent.JUMPS)
+            + w.getOrDefault(SimulationComponent.JUMPS, 0.0f)
             * (result.getNumJumps() / 15.0f)
 
-            + Weights.TASK1_SIMULATION_WEIGHTS.get(SimulationComponent.COINS)
+            + w.getOrDefault(SimulationComponent.COINS, 0.0f)
             * (result.getNumCollectedTileCoins() / 30.0f)
 
-            + Weights.TASK1_SIMULATION_WEIGHTS.get(SimulationComponent.NOT_PASSED)
+            + w.getOrDefault(SimulationComponent.NOT_PASSED, 0.0f)
             * notPassedPenalty;
     }
 }

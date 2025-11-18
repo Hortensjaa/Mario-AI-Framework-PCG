@@ -1,10 +1,10 @@
 package engine.core;
 
-import java.util.ArrayList;
-
 import engine.helper.EventType;
 import engine.helper.GameStatus;
 import engine.helper.SpriteType;
+
+import java.util.ArrayList;
 
 public class MarioResult {
     private MarioWorld world;

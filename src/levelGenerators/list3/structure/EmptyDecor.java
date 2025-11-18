@@ -1,7 +1,6 @@
 package levelGenerators.list3.structure;
 
 import engine.core.MarioLevelModel;
-import lombok.AllArgsConstructor;
 
 import java.util.Random;
 
@@ -11,6 +10,10 @@ public class EmptyDecor extends Decorator {
 
     public EmptyDecor() {
         width = new Random().nextInt(MAX_WIDTH) + 1;
+    }
+
+    public EmptyDecor(int width) {
+        this.width = width;
     }
 
     @Override

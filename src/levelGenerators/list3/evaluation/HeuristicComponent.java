@@ -17,5 +17,6 @@ public enum HeuristicComponent {
     PIPES_COUNT,
     BILLS_COUNT,
     HILLS_COUNT,
-    GAP_FIRST
+    GAP_FIRST,
+    WIDER_TERRAINS_BONUS
 }
