@@ -9,6 +9,7 @@ import levelGenerators.list3.structure.*;
 
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.stream.IntStream;
 
 
 public final class Evaluation {
@@ -63,39 +64,39 @@ public final class Evaluation {
     }
 
     // Counting methods using generic countSelectedScore
-    private static float countEnemiesScore(LevelStructure level) {
+    public static float countEnemiesScore(LevelStructure level) {
         return countSelectedScore(Enemy.class, level::getDecorators, NUMBER_OF_DECORATORS);
     }
 
-    private static float countBlocksScore(LevelStructure level) {
+    public static float countBlocksScore(LevelStructure level) {
         return countSelectedScore(Bumpable.class, level::getDecorators, NUMBER_OF_DECORATORS);
     }
 
-    private static float countCoinsScore(LevelStructure level) {
+    public static float countCoinsScore(LevelStructure level) {
         return countSelectedScore(Coins.class, level::getDecorators, NUMBER_OF_DECORATORS);
     }
 
-    private static float countGapsScore(LevelStructure level) {
+    public static float countGapsScore(LevelStructure level) {
         return countSelectedScore(Gap.class, level::getTerrains, NUMBER_OF_TERRAINS);
     }
 
-    private static float countHillsScore(LevelStructure level) {
+    public static float countHillsScore(LevelStructure level) {
         return countSelectedScore(Hill.class, level::getTerrains, NUMBER_OF_TERRAINS);
     }
 
-    private static float countPlainsScore(LevelStructure level) {
+    public static float countPlainsScore(LevelStructure level) {
         return countSelectedScore(Plain.class, level::getTerrains, NUMBER_OF_TERRAINS);
     }
 
-    private static float countBillsScore(LevelStructure level) {
+    public static float countBillsScore(LevelStructure level) {
         return countSelectedScore(BulletBill.class, level::getTerrains, NUMBER_OF_TERRAINS);
     }
 
-    private static float countPipesScore(LevelStructure level) {
+    public static float countPipesScore(LevelStructure level) {
         return countSelectedScore(Pipe.class, level::getTerrains, NUMBER_OF_TERRAINS);
     }
 
-    private static float widerTerrainsBonus(LevelStructure level) {
+    public static float widerTerrainsBonus(LevelStructure level) {
         int totalWidthSquare = 0;
         for (var terrain : level.getTerrains()) {
             totalWidthSquare += terrain.getWidth() * terrain.getWidth();
@@ -103,47 +104,55 @@ public final class Evaluation {
         return (float) Math.sqrt((double) totalWidthSquare / (LEVEL_WIDTH * LEVEL_WIDTH)) * 10.0f;
     }
 
-//    private static float enemyDistanceFromGapBonus(LevelStructure level) {
-//        List<Terrain> terrains = level.getTerrains();
-//        List<Decorator> decorators = level.getDecorators();
-//        Terrain currentTerrain = terrains.getFirst();
-//        Decorator currentDecorator = decorators.getFirst();
-//        int terrainStepsLeft = currentTerrain.getWidth();
-//        int decoratorStepsLeft = currentDecorator.getWidth();
-//        int currentDecoratorIndex = 0;
-//        int currentTerrainIndex = 0;
-//        int distanceFromGap = Integer.MAX_VALUE;
-//        for (int x = 0; x < LEVEL_WIDTH; x++) {
-//            if (currentTerrain instanceof Gap && currentDecorator instanceof Enemy) {
-//                return 1.0f - (x / (float) LEVEL_WIDTH);
-//            }
-////           move forward on terrain
-//            terrainStepsLeft -= 1;
-//            if (terrainStepsLeft == 0) {
-//                currentTerrainIndex += 1;
-//                if (currentTerrainIndex >= terrains.size()) {
-//                    break;
-//                }
-//                currentTerrain = terrains.get(currentTerrainIndex);
-//                terrainStepsLeft = currentTerrain.getWidth();
-//            }
-////            move forward on decorator
-//            decoratorStepsLeft -= 1;
-//            if (decoratorStepsLeft == 0) {
-//                currentDecoratorIndex += 1;
-//                if (currentDecoratorIndex >= decorators.size()) {
-//                    break;
-//                }
-//                currentTerrain = decorators.get(currentDecoratorIndex);
-//                terrainStepsLeft = currentTerrain.getWidth();
-//            }
-//
-//        }
-//        return 0;
-//    }
+    public static float enemyDistanceFromGapBonus(LevelStructure level) {
+        List<Terrain> terrains = level.getTerrains();
+        List<Decorator> decorators = level.getDecorators();
+        Terrain currentTerrain = terrains.getFirst();
+        Decorator currentDecorator = decorators.getFirst();
+        int terrainStepsLeft = currentTerrain.getWidth();
+        int decoratorStepsLeft = currentDecorator.getWidth();
+        int currentDecoratorIndex = 0;
+        int currentTerrainIndex = 0;
+        int distanceFromGap = 0;
+        int bonusSum = 0;
+        for (int x = 0; x < LEVEL_WIDTH; x++) {
+            if (currentTerrain instanceof Gap) {
+                if (currentDecorator instanceof Enemy) {
+                    if (distanceFromGap != Integer.MAX_VALUE) {
+                        bonusSum += distanceFromGap;
+                    }
+                    distanceFromGap = 0;
+                }
+            } else {
+                distanceFromGap += 1;
+            }
+//           move forward on terrain
+            terrainStepsLeft -= 1;
+            if (terrainStepsLeft == 0) {
+                currentTerrainIndex += 1;
+                if (currentTerrainIndex >= terrains.size()) {
+                    break;
+                }
+                currentTerrain = terrains.get(currentTerrainIndex);
+                terrainStepsLeft = currentTerrain.getWidth();
+            }
+//            move forward on decorator
+            decoratorStepsLeft -= 1;
+            if (decoratorStepsLeft == 0) {
+                currentDecoratorIndex += 1;
+                if (currentDecoratorIndex >= decorators.size()) {
+                    break;
+                }
+                currentDecorator = decorators.get(currentDecoratorIndex);
+                terrainStepsLeft = currentTerrain.getWidth();
+            }
+
+        }
+        return (float) bonusSum / LEVEL_WIDTH;
+    }
 
     /** Count enemy groups (3 or more enemies in a row) and divide its number by the number of all decorators */
-    private static float enemyGroupsScore(LevelStructure level) {
+    public static float enemyGroupsScore(LevelStructure level) {
         int curDensity = 0;
         int numberOfGroups = 0;
         for (var decorator : level.getDecorators()) {
@@ -160,7 +169,7 @@ public final class Evaluation {
     }
 
     /** Count gaps that are not passable (longer than 4) */
-    private static float notPassableGapsPenalty(LevelStructure level) {
+    public static float notPassableGapsPenalty(LevelStructure level) {
         int notPassableGapCount = 0;
         int curGapLength = 0;
         for (var terrain : level.getTerrains()) {
@@ -177,7 +186,7 @@ public final class Evaluation {
     }
 
     /** Count jumps that are not passable (higher than 4) */
-    private static float notPassableJumpsPenalty(LevelStructure level) {
+    public static float notPassableJumpsPenalty(LevelStructure level) {
         int notPassableJumpCount = 0;
         for (int i = 0; i < level.getTerrains().size() - 1; i++) {
             var terrain = level.getTerrains().get(i);
@@ -204,7 +213,7 @@ public final class Evaluation {
     }
 
     /** Is gap a first terrain structure? */
-    private static float gapFirstPenalty(LevelStructure level) {
+    public static float gapFirstPenalty(LevelStructure level) {
         if (!level.getTerrains().isEmpty() && level.getTerrains().getFirst() instanceof Gap) {
             return 1;
         }
@@ -212,7 +221,7 @@ public final class Evaluation {
     }
 
     /** Are we starting directly above enemy?  */
-    private static float enemyFirstPenalty(LevelStructure level) {
+    public static float enemyFirstPenalty(LevelStructure level) {
         if (!level.getDecorators().isEmpty() && level.getDecorators().getFirst() instanceof Enemy) {
             return 1;
         }
@@ -220,7 +229,7 @@ public final class Evaluation {
     }
 
     /** Check for monotonous terrain fragments (same type or height) */
-    private static float localTerrainDiversity(LevelStructure level) {
+    public static float localTerrainDiversity(LevelStructure level) {
         int s = 0;
         List<Terrain> terrains = level.getTerrains();
         int size = terrains.size();
@@ -236,7 +245,7 @@ public final class Evaluation {
     }
 
     /** Check for monotonous decor fragments (same type) */
-    private static float localDecorDiversity(LevelStructure level) {
+    public static float localDecorDiversity(LevelStructure level) {
         int s = 0;
         List<Decorator> decorators = level.getDecorators();
         int size = decorators.size();
@@ -249,14 +258,14 @@ public final class Evaluation {
     }
 
     /** Number of different terrain structures overall and its proportion */
-    private static float overallTerrainDiversity(LevelStructure level) {
+    public static float overallTerrainDiversity(LevelStructure level) {
         List<Terrain> terrains = level.getTerrains();
         List<Class<? extends Mutable>> types = List.of(Hill.class, BulletBill.class, Gap.class, Pipe.class, Plain.class);
         return genericDiversity(terrains, types);
     }
 
     /** Number of different decorators overall and its proportion */
-    private static float overallDecorDiversity(LevelStructure level) {
+    public static float overallDecorDiversity(LevelStructure level) {
         List<Decorator> decors = level.getDecorators();
         List<Class<? extends Mutable>> types = List.of(Bumpable.class, Coins.class, Enemy.class, EmptyDecor.class);
         return genericDiversity(decors, types);
@@ -265,61 +274,13 @@ public final class Evaluation {
     // ---------------- task heuristics ----------------
     public static float heuristic(LevelStructure level, Weights weights) {
         var w = weights.getHeuristicWeights();
+        float score = 0.0f;
 
-        return
-            + w.getOrDefault(HeuristicComponent.TERRAIN_DIVERSITY, 0.0f)
-            * overallTerrainDiversity(level)
+        for (HeuristicComponent component : HeuristicComponent.values()) {
+            score += w.getOrDefault(component, 0.0f) * component.evaluate(level);
+        }
 
-            + w.getOrDefault(HeuristicComponent.DECOR_DIVERSITY, 0.0f)
-            * overallDecorDiversity(level)
-
-            + w.getOrDefault(HeuristicComponent.LOCAL_TERRAIN_DIVERSITY, 0.0f)
-            * localTerrainDiversity(level)
-
-            + w.getOrDefault(HeuristicComponent.LOCAL_DECOR_DIVERSITY, 0.0f)
-            * localDecorDiversity(level)
-
-            + w.getOrDefault(HeuristicComponent.ENEMIES_COUNT, 0.0f)
-            * countEnemiesScore(level)
-
-            + w.getOrDefault(HeuristicComponent.BLOCKS_COUNT, 0.0f)
-            * countBlocksScore(level)
-
-            + w.getOrDefault(HeuristicComponent.COINS_COUNT, 0.0f)
-            * countCoinsScore(level)
-
-            + w.getOrDefault(HeuristicComponent.GAPS_COUNT, 0.0f)
-            * countGapsScore(level)
-
-            + w.getOrDefault(HeuristicComponent.HILLS_COUNT, 0.0f)
-            * countHillsScore(level)
-
-            + w.getOrDefault(HeuristicComponent.PLAINS_COUNT, 0.0f)
-            * countPlainsScore(level)
-
-            + w.getOrDefault(HeuristicComponent.PIPES_COUNT, 0.0f)
-            * countPipesScore(level)
-
-            + w.getOrDefault(HeuristicComponent.BILLS_COUNT, 0.0f)
-            * countBillsScore(level)
-
-            + w.getOrDefault(HeuristicComponent.WIDER_TERRAINS_BONUS, 0.0f)
-            * widerTerrainsBonus(level)
-
-            + w.getOrDefault(HeuristicComponent.ENEMY_GROUPS, 0.0f)
-            * enemyGroupsScore(level)
-
-            + w.getOrDefault(HeuristicComponent.ENEMY_FIRST, 0.0f)
-            * enemyFirstPenalty(level)
-
-            + w.getOrDefault(HeuristicComponent.NOT_PASSABLE_GAPS, 0.0f)
-            * notPassableGapsPenalty(level)
-
-            + w.getOrDefault(HeuristicComponent.NOT_PASSABLE_JUMPS, 0.0f)
-            * notPassableJumpsPenalty(level)
-
-            + w.getOrDefault(HeuristicComponent.GAP_FIRST, 0.0f)
-            * gapFirstPenalty(level);
+        return score;
     }
 
 
@@ -330,25 +291,38 @@ public final class Evaluation {
                 model, level.getTerrains(), level.getDecorators()
         );
         MarioGame game = new MarioGame();
-        MarioResult result = game.runGame(marioagent, renderedLevel, TIME_LIMIT, 0, false);
+        MarioResult result = game.runGame(
+                marioagent,
+                renderedLevel,
+                TIME_LIMIT,
+                0,
+                false
+        );
 
-        int notPassedPenalty = result.getCompletionPercentage() == 1.0f ? 0 : 1;
+        float score = 0.0f;
+
         var w = weights.getSimulationWeights();
+        for (SimulationComponent component : SimulationComponent.values()) {
+            score += w.getOrDefault(component, 0.0f) * component.evaluate(result);
+        }
 
-        return
-            + w.getOrDefault(SimulationComponent.COMPLETION, 0.0f)
-            * result.getCompletionPercentage()
+        return score;
+    }
 
-            + w.getOrDefault(SimulationComponent.KILLS, 0.0f)
-            * (result.getKillsTotal() / 5.0f)
-
-            + w.getOrDefault(SimulationComponent.JUMPS, 0.0f)
-            * (result.getNumJumps() / 15.0f)
-
-            + w.getOrDefault(SimulationComponent.COINS, 0.0f)
-            * (result.getNumCollectedTileCoins() / 30.0f)
-
-            + w.getOrDefault(SimulationComponent.NOT_PASSED, 0.0f)
-            * notPassedPenalty;
+    public static float repeatedSimulation(
+            LevelStructure level,
+            Supplier<MarioAgent> agentSupplier,
+            Weights weights,
+            int repetitions
+    ) {
+        return (float) IntStream.range(0, repetitions)
+                .parallel()
+                .mapToDouble(i -> {
+                    float res = simulation(level, agentSupplier.get(), weights);
+                    System.out.println("Repetition " + i + " of " + repetitions + " SCORE: " + res);
+                    return res;
+                })
+                .average()
+                .orElse(-100.0f);
     }
 }

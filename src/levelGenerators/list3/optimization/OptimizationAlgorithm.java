@@ -30,10 +30,35 @@ public abstract class OptimizationAlgorithm implements MarioLevelGenerator {
 
     public abstract LevelStructure getBestLevel();
 
-    protected abstract LevelStructure mutateLevel(LevelStructure level);
+    public void reset() {
+        rng.setSeed(System.currentTimeMillis());
+    }
+
+    protected LevelStructure mutateLevel(LevelStructure level) {
+        List<Decorator> decorators = level.getDecorators();
+        List<Terrain> terrains = level.getTerrains();
+        int r = rng.nextInt(6);
+        switch (r) {
+            case 0 -> decorators = swapDecorators(decorators);
+            case 1 -> terrains = swapTerrains(terrains);
+            case 2 -> decorators = replaceDecorator(decorators);
+            case 3 -> terrains = replaceTerrain(terrains);
+            case 4 -> decorators = mutateRandomDecorators(decorators);
+            case 5 -> terrains = mutateRandomTerrains(terrains);
+        }
+        return new LevelStructure(terrains, decorators);
+    }
 
     protected static LevelStructure generateSingleLevel() {
         return new RandomLevelCreator().generateLevelStructure(LEVEL_WIDTH);
+    }
+
+    protected static List<LevelStructure> generateMultipleLevels(int n) {
+       List<LevelStructure> levels = new ArrayList<>(n);
+       for (int i = 0; i < n; i++) {
+           levels.add(generateSingleLevel());
+       }
+       return levels;
     }
 
     // ------------------ mutation types ------------------

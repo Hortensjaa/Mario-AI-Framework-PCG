@@ -1,10 +1,10 @@
 package levelGenerators.list3.optimization;
 
 import levelGenerators.list3.evaluation.Evaluation;
-import levelGenerators.list3.evaluation.Weights;
 import levelGenerators.list3.structure.Decorator;
 import levelGenerators.list3.structure.LevelStructure;
 import levelGenerators.list3.structure.Terrain;
+import levelGenerators.list3.subtasks.Subtask1;
 
 import java.util.List;
 
@@ -25,11 +25,11 @@ public class HillClimbing extends OptimizationAlgorithm {
     public LevelStructure getBestLevel() {
         curLevel = generateSingleLevel();
         bestLevel = curLevel;
-        curScore = Evaluation.heuristic(curLevel, Weights.SUBTASK1);
+        curScore = Evaluation.heuristic(curLevel, Subtask1.WEIGHTS);
         int generation = 0;
         while (generation < GENERATIONS) {
             LevelStructure mutatedLevel = mutateLevel(curLevel);
-            float mutatedScore = Evaluation.heuristic(mutatedLevel, Weights.SUBTASK1);
+            float mutatedScore = Evaluation.heuristic(mutatedLevel, Subtask1.WEIGHTS);
             if (mutatedScore > curScore) {
                 curLevel = mutatedLevel;
                 curScore = mutatedScore;
