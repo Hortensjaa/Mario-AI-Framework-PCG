@@ -17,8 +17,7 @@ public class Subtask2 extends MuPlusLambdaEvolution {
         return getBestLevel(
                 WEIGHTS,
                 agents.killer.Agent::new,
-                0,
-                50
+                1
         );
     }
 

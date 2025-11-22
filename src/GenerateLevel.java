@@ -1,6 +1,7 @@
 import engine.core.*;
 import engine.helper.GameStatus;
-import levelGenerators.list3.subtasks.Subtask2;
+import levelGenerators.list3.optimization.OptimizationAlgorithm;
+import levelGenerators.list3.subtasks.Subtask3;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -51,6 +52,42 @@ public class GenerateLevel {
         System.out.println("Avg. enemies: " + kills/(double)numLevels);
     }
 
+    public static void runMultiple(OptimizationAlgorithm generator, MarioAgent agent1, MarioAgent agent2, int numLevels, boolean visuals) {
+        MarioGame game = new MarioGame();
+        int passed1 = 0;
+        int passed2 = 0;
+        int coins1 = 0;
+        int coins2 = 0;
+        int kills1 = 0;
+        int kills2 = 0;
+        for (int i = 0; i < numLevels; i++) {
+            String level = generator.getGeneratedLevel(new MarioLevelModel(LEVEL_WIDTH, LEVEL_HEIGHT), new MarioTimer(5 * 60 * 60 * 1000));
+            writeLevel(generator.getGeneratorName(), i, level);
+            generator.saveProgressRecords(i);
+            System.out.println("Running level " + (i + 1) + "..." + (visuals ? "" : " (headless)"));
+            // agent 1
+            MarioResult runresult1 = game.runGame(agent1, level, TIMER, 0, visuals);
+            printResults(runresult1);
+            if (runresult1.getGameStatus() == GameStatus.WIN) passed1++;
+            coins1 += runresult1.getCurrentCoins();
+            kills1 += runresult1.getKillsTotal();
+            // agent 2
+            MarioResult runresult2 = game.runGame(agent2, level, TIMER, 0, visuals);
+            printResults(runresult2);
+            if (runresult2.getGameStatus() == GameStatus.WIN) passed2++;
+            coins2 += runresult2.getCurrentCoins();
+            kills2 += runresult2.getKillsTotal();
+        }
+        System.out.println("--------------agent 1----------------");
+        System.out.println("Passed %:     " + passed1*100.0/numLevels);
+        System.out.println("Avg. coins:   " + coins1/(double)numLevels);
+        System.out.println("Avg. enemies: " + kills1/(double)numLevels);
+        System.out.println("--------------agent 2----------------");
+        System.out.println("Passed %:     " + passed2*100.0/numLevels);
+        System.out.println("Avg. coins:   " + coins2/(double)numLevels);
+        System.out.println("Avg. enemies: " + kills2/(double)numLevels);
+    }
+
     public static String getLevel(String filepath) {
         String content = "";
         try {
@@ -80,15 +117,14 @@ public class GenerateLevel {
         MarioGame game = new MarioGame();
 
         /* todo choose map generator to create a level (uncomment the one you want to use): */
-        MarioLevelGenerator generator = new Subtask2();
-//        MarioLevelGenerator generator = new Subtask2();
+        OptimizationAlgorithm generator = new Subtask3();
+//        OptimizationAlgorithm generator = new Subtask2();
 //        MarioLevelGenerator generator = new levelGenerators.notch.LevelGenerator();    // original generator by Notch
 //        MarioLevelGenerator generator = new levelGenerators.benWeber.LevelGenerator(); // winner of the 2010 PCG Mario AI Competition: makes multiple passes along the level, in each pass adding a new type of level item
 //        MarioLevelGenerator generator = new levelGenerators.linear.LevelGenerator();     // flat ground with holes, occasional pipes and monsters
 //        MarioLevelGenerator generator = new levelGenerators.sampler.LevelGenerator();  // creates levels by sampling parts of original levels
 //        MarioLevelGenerator generator = new levelGenerators.random.LevelGenerator();   // places objects randomly
 
-        /* todo choose level from generator or file */
         String level = generator.getGeneratedLevel(new MarioLevelModel(LEVEL_WIDTH, LEVEL_HEIGHT), new MarioTimer(20 * 60 * 60 * 1000));
 //        String level = getLevel("./levels/original/lvl-1.txt");
 
@@ -108,11 +144,11 @@ public class GenerateLevel {
 //        MarioAgent marioagent = new agents.random.Agent();           // random agent (much higher probabilities to run/jump right)
 //        MarioAgent marioagent = new agents.doNothing.Agent();        // stays in place
 //        MarioAgent marioagent = new agents.collector.Agent();        // A* with bonus for collecting coins;  from: https://github.com/obsidian-zero/Mario-AI-Framework
-        MarioAgent marioagent = new agents.killer.Agent();           // A* with bonus for defeating enemies; from: https://github.com/obsidian-zero/Mario-AI-Framework
+//        MarioAgent marioagent = new agents.killer.Agent();           // A* with bonus for defeating enemies; from: https://github.com/obsidian-zero/Mario-AI-Framework
 
 //        MarioResult runresult = game.runGame(marioagent, level, TIMER, 0, false);
 //        printResults(runresult);
 
-        runMultiple(generator, marioagent, 10, true);
+        runMultiple(generator, new agents.collector.Agent(), new agents.killer.Agent(), 1, true);
     }
 }

@@ -4,6 +4,7 @@ import engine.core.MarioLevelGenerator;
 import engine.core.MarioLevelModel;
 import engine.core.MarioTimer;
 import levelGenerators.list3.LevelRenderer;
+import levelGenerators.list3.ProgressRecorder;
 import levelGenerators.list3.RandomLevelCreator;
 import levelGenerators.list3.structure.*;
 
@@ -20,6 +21,7 @@ public abstract class OptimizationAlgorithm implements MarioLevelGenerator {
     private final static int TIMER_INIT = 5 * 60 * 60 * 1000;
 
     private final LevelRenderer renderer = new LevelRenderer();
+    protected final ProgressRecorder recorder = new ProgressRecorder();
     protected final RandomLevelCreator creator;
     protected final Random rng;
 
@@ -32,6 +34,7 @@ public abstract class OptimizationAlgorithm implements MarioLevelGenerator {
 
     public void reset() {
         rng.setSeed(System.currentTimeMillis());
+        recorder.clear();
     }
 
     protected LevelStructure mutateLevel(LevelStructure level) {
@@ -164,5 +167,9 @@ public abstract class OptimizationAlgorithm implements MarioLevelGenerator {
     public String getGeneratedLevel(MarioLevelModel model, MarioTimer timer) {
         LevelStructure structure = getBestLevel();
         return renderer.getRenderedLevel(model, structure.getTerrains(), structure.getDecorators());
+    }
+
+    public void saveProgressRecords(int num) {
+        recorder.saveToCSV(getGeneratorName(), num);
     }
 }

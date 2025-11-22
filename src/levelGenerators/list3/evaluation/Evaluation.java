@@ -317,11 +317,7 @@ public final class Evaluation {
     ) {
         return (float) IntStream.range(0, repetitions)
                 .parallel()
-                .mapToDouble(i -> {
-                    float res = simulation(level, agentSupplier.get(), weights);
-                    System.out.println("Repetition " + i + " of " + repetitions + " SCORE: " + res);
-                    return res;
-                })
+                .mapToDouble(_ -> simulation(level, agentSupplier.get(), weights))
                 .average()
                 .orElse(-100.0f);
     }

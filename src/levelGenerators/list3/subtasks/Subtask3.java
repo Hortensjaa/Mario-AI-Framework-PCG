@@ -10,55 +10,58 @@ import java.util.Map;
 
 import static java.util.Map.entry;
 
-public class Subtask1 extends MuPlusLambdaEvolution {
+public class Subtask3 extends MuPlusLambdaEvolution {
     @Override
     public LevelStructure getBestLevel() {
         reset();
         return getBestLevel(
                 WEIGHTS,
-                agents.robinBaumgarten.Agent::new,
-                5
+                agents.killer.Agent::new,
+                agents.collector.Agent::new,
+                1
         );
     }
 
-    @Override
-    public String getGeneratorName() {
-        return "MuPlusLambdaEvolution1";
-    }
-
     public static final Weights WEIGHTS = new Weights(
-            100f, // heuristicUpperBound
-            100f, // simulationUpperBound
+            80f, // heuristicUpperBound
+            25f, // simulationUpperBound
             Map.ofEntries(
                     // ------------ diversity ------------
-                    entry(HeuristicComponent.WIDER_TERRAINS_BONUS, 10f),
-                    entry(HeuristicComponent.TERRAIN_DIVERSITY, 10f),
+                    entry(HeuristicComponent.WIDER_TERRAINS_BONUS, 15f),
+                    entry(HeuristicComponent.TERRAIN_DIVERSITY, 5f),
                     entry(HeuristicComponent.DECOR_DIVERSITY, 10f),
-                    entry(HeuristicComponent.LOCAL_DECOR_DIVERSITY, 10f),
                     entry(HeuristicComponent.LOCAL_TERRAIN_DIVERSITY, 5f),
+                    entry(HeuristicComponent.LOCAL_DECOR_DIVERSITY, 10f),
                     // ------------ decorators ------------
-                    entry(HeuristicComponent.ENEMIES_COUNT, 5f),
-                    entry(HeuristicComponent.BLOCKS_COUNT, 1f),
-                    entry(HeuristicComponent.COINS_COUNT, 1f),
+                    entry(HeuristicComponent.ENEMY_GAP_DISTANCE_BONUS, 2f),
+                    entry(HeuristicComponent.ENEMIES_COUNT, 1f),
+                    entry(HeuristicComponent.BLOCKS_COUNT, 0f),
+                    entry(HeuristicComponent.COINS_COUNT, 3f),
                     // ------------ terrains ------------
-                    entry(HeuristicComponent.HILLS_COUNT, 2f),
-                    entry(HeuristicComponent.BILLS_COUNT, 1f),
-                    entry(HeuristicComponent.PIPES_COUNT, 2f),
-                    entry(HeuristicComponent.GAPS_COUNT, 1f),
-                    entry(HeuristicComponent.PLAINS_COUNT, 2f),
+                    entry(HeuristicComponent.HILLS_COUNT, 3f),
+                    entry(HeuristicComponent.BILLS_COUNT, 0f),
+                    entry(HeuristicComponent.PIPES_COUNT, 3f),
+                    entry(HeuristicComponent.GAPS_COUNT, 0f),
+                    entry(HeuristicComponent.PLAINS_COUNT, 3f),
                     // ------------ penalties ------------
+                    entry(HeuristicComponent.ENEMY_FIRST, -1f),
                     entry(HeuristicComponent.ENEMY_GROUPS, -5f),
-                    entry(HeuristicComponent.ENEMY_FIRST, -25f),
                     entry(HeuristicComponent.NOT_PASSABLE_GAPS, -50f),
                     entry(HeuristicComponent.NOT_PASSABLE_JUMPS, -50f),
                     entry(HeuristicComponent.GAP_FIRST, -100f)
             ),
             Map.of(
-                    SimulationComponent.COMPLETION, 50f,
-                    SimulationComponent.KILLS, 3f,
-                    SimulationComponent.JUMPS, 0.3f,
+                    SimulationComponent.COMPLETION, 10f,
+                    SimulationComponent.KILLS, 1f,
+                    SimulationComponent.JUMPS, 0.001f,
                     SimulationComponent.COINS, 0.1f,
                     SimulationComponent.NOT_PASSED, -100f
             )
     );
+
+    @Override
+    public String getGeneratorName() {
+        return "MuPlusLambdaEvolution3";
+    }
 }
+
