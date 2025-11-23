@@ -1,7 +1,8 @@
 import engine.core.*;
 import engine.helper.GameStatus;
 import levelGenerators.list3.optimization.OptimizationAlgorithm;
-import levelGenerators.list3.subtasks.Subtask3;
+import levelGenerators.list3.subtasks.Subtask1;
+import levelGenerators.list3.subtasks.Subtask2;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -28,7 +29,7 @@ public class GenerateLevel {
         System.out.println("****************************************************************");
     }
 
-    public static void runMultiple(MarioLevelGenerator generator, MarioAgent agent, int numLevels, boolean visuals) {
+    public static void runMultiple(OptimizationAlgorithm generator, MarioAgent agent, int numLevels, boolean visuals) {
         MarioGame game = new MarioGame();
         int passed = 0;
         int coins = 0;
@@ -37,6 +38,7 @@ public class GenerateLevel {
         for (int i = 0; i < numLevels; i++) {
             String level = generator.getGeneratedLevel(new MarioLevelModel(LEVEL_WIDTH, LEVEL_HEIGHT), new MarioTimer(5 * 60 * 60 * 1000));
             writeLevel(generator.getGeneratorName(), i, level);
+            generator.saveProgressRecords(i);
             System.out.println("Running level " + (i + 1) + "..." + (visuals ? "" : " (headless)"));
             //printLevel(level);
             MarioResult runresult = game.runGame(agent, level, TIMER, 0, visuals);
@@ -117,7 +119,7 @@ public class GenerateLevel {
         MarioGame game = new MarioGame();
 
         /* todo choose map generator to create a level (uncomment the one you want to use): */
-        OptimizationAlgorithm generator = new Subtask3();
+//        OptimizationAlgorithm generator = new Subtask3();
 //        OptimizationAlgorithm generator = new Subtask2();
 //        MarioLevelGenerator generator = new levelGenerators.notch.LevelGenerator();    // original generator by Notch
 //        MarioLevelGenerator generator = new levelGenerators.benWeber.LevelGenerator(); // winner of the 2010 PCG Mario AI Competition: makes multiple passes along the level, in each pass adding a new type of level item
@@ -125,7 +127,7 @@ public class GenerateLevel {
 //        MarioLevelGenerator generator = new levelGenerators.sampler.LevelGenerator();  // creates levels by sampling parts of original levels
 //        MarioLevelGenerator generator = new levelGenerators.random.LevelGenerator();   // places objects randomly
 
-        String level = generator.getGeneratedLevel(new MarioLevelModel(LEVEL_WIDTH, LEVEL_HEIGHT), new MarioTimer(20 * 60 * 60 * 1000));
+//        String level = generator.getGeneratedLevel(new MarioLevelModel(LEVEL_WIDTH, LEVEL_HEIGHT), new MarioTimer(20 * 60 * 60 * 1000));
 //        String level = getLevel("./levels/original/lvl-1.txt");
 
 //        printLevel(level);
@@ -149,6 +151,8 @@ public class GenerateLevel {
 //        MarioResult runresult = game.runGame(marioagent, level, TIMER, 0, false);
 //        printResults(runresult);
 
-        runMultiple(generator, new agents.collector.Agent(), new agents.killer.Agent(), 1, true);
+//        runMultiple(generator, new agents.collector.Agent(), new agents.killer.Agent(), 1, true);
+        runMultiple(new Subtask2(), new agents.killer.Agent(), 10, true);
+        runMultiple(new Subtask1(), new agents.robinBaumgarten.Agent(), 10, true);
     }
 }
