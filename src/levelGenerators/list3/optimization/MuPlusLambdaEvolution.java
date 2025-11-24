@@ -16,9 +16,9 @@ public abstract class MuPlusLambdaEvolution extends OptimizationAlgorithm {
 
     int MU = 5;
     int LAMBDA = 20;
-    int N = 100;
+    int N = 200;
     int REPEAT_SIM = 5;
-    int SIMULATE_EVERY = 50;
+    int SIMULATE_EVERY = 100;
 
     List<LevelStructure> population;
 
@@ -32,7 +32,7 @@ public abstract class MuPlusLambdaEvolution extends OptimizationAlgorithm {
         return runEvolution(
                 weights,
                 maxRetries,
-                level -> Evaluation.repeatedSimulation(level, agent, weights, REPEAT_SIM)
+                level -> Evaluation.repeatedSimulation(level, agent, weights.getSimulationWeights(), REPEAT_SIM)
         );
     }
 
@@ -47,8 +47,8 @@ public abstract class MuPlusLambdaEvolution extends OptimizationAlgorithm {
                 weights,
                 maxRetries,
                 level -> average(
-                        Evaluation.repeatedSimulation(level, agent1, weights, REPEAT_SIM),
-                        Evaluation.repeatedSimulation(level, agent2, weights, REPEAT_SIM)
+                        Evaluation.repeatedSimulation(level, agent1, weights.getSimulationWeights(), REPEAT_SIM),
+                        Evaluation.repeatedSimulation(level, agent2, weights.getSimulationWeights2(), REPEAT_SIM)
                 )
         );
     }

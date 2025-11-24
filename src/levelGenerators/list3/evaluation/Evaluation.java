@@ -8,6 +8,7 @@ import levelGenerators.list3.LevelRenderer;
 import levelGenerators.list3.structure.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
@@ -285,7 +286,8 @@ public final class Evaluation {
 
 
     // ---------------- task simulations ----------------
-    public static float simulation(LevelStructure level, MarioAgent marioagent, Weights weights) {
+    public static float simulation(LevelStructure level, MarioAgent marioagent,
+                                   Map<SimulationComponent, Float> weights) {
         MarioLevelModel model = new MarioLevelModel(LEVEL_WIDTH, 16);
         String renderedLevel = new LevelRenderer().getRenderedLevel(
                 model, level.getTerrains(), level.getDecorators()
@@ -301,9 +303,8 @@ public final class Evaluation {
 
         float score = 0.0f;
 
-        var w = weights.getSimulationWeights();
         for (SimulationComponent component : SimulationComponent.values()) {
-            score += w.getOrDefault(component, 0.0f) * component.evaluate(result);
+            score += weights.getOrDefault(component, 0.0f) * component.evaluate(result);
         }
 
         return score;
@@ -312,7 +313,7 @@ public final class Evaluation {
     public static float repeatedSimulation(
             LevelStructure level,
             Supplier<MarioAgent> agentSupplier,
-            Weights weights,
+            Map<SimulationComponent, Float> weights,
             int repetitions
     ) {
         return (float) IntStream.range(0, repetitions)

@@ -11,6 +11,7 @@ public class Weights {
     private final float simulationUpperBound;
     private final Map<HeuristicComponent, Float> heuristicWeights;
     private final Map<SimulationComponent, Float> simulationWeights;
+    private final Map<SimulationComponent, Float> simulationWeights2;
 
     // Constructor
     public Weights(
@@ -23,6 +24,22 @@ public class Weights {
         this.simulationUpperBound = simulationUpperBound;
         this.heuristicWeights = heuristicWeights;
         this.simulationWeights = simulationWeights;
+        this.simulationWeights2 = null;
+    }
+
+    // Constructor
+    public Weights(
+            float heuristicUpperBound,
+            float simulationUpperBound,
+            Map<HeuristicComponent, Float> heuristicWeights,
+            Map<SimulationComponent, Float> simulationWeights,
+            Map<SimulationComponent, Float> simulationWeights2
+    ) {
+        this.heuristicUpperBound = heuristicUpperBound;
+        this.simulationUpperBound = simulationUpperBound;
+        this.heuristicWeights = heuristicWeights;
+        this.simulationWeights = simulationWeights;
+        this.simulationWeights2 = simulationWeights2;
     }
 }
 

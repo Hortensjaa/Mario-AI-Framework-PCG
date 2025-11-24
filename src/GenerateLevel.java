@@ -1,8 +1,6 @@
 import engine.core.*;
 import engine.helper.GameStatus;
 import levelGenerators.list3.optimization.OptimizationAlgorithm;
-import levelGenerators.list3.subtasks.Subtask1;
-import levelGenerators.list3.subtasks.Subtask2;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -152,7 +150,8 @@ public class GenerateLevel {
 //        printResults(runresult);
 
 //        runMultiple(generator, new agents.collector.Agent(), new agents.killer.Agent(), 1, true);
-        runMultiple(new Subtask2(), new agents.killer.Agent(), 10, true);
-        runMultiple(new Subtask1(), new agents.robinBaumgarten.Agent(), 10, true);
+//        runMultiple(new Subtask2(), new agents.killer.Agent(), 10, true);
+//        runMultiple(new Subtask1(), new agents.robinBaumgarten.Agent(), 10, true);
+//        runMultiple(new Subtask3(), new agents.collector.Agent(), new agents.killer.Agent(), 10, true);
     }
 }

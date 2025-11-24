@@ -16,15 +16,15 @@ public class Subtask3 extends MuPlusLambdaEvolution {
         reset();
         return getBestLevel(
                 WEIGHTS,
-                agents.killer.Agent::new,
                 agents.collector.Agent::new,
+                agents.killer.Agent::new,
                 1
         );
     }
 
     public static final Weights WEIGHTS = new Weights(
             80f, // heuristicUpperBound
-            25f, // simulationUpperBound
+            20f, // simulationUpperBound
             Map.ofEntries(
                     // ------------ diversity ------------
                     entry(HeuristicComponent.WIDER_TERRAINS_BONUS, 15f),
@@ -50,11 +50,20 @@ public class Subtask3 extends MuPlusLambdaEvolution {
                     entry(HeuristicComponent.NOT_PASSABLE_JUMPS, -50f),
                     entry(HeuristicComponent.GAP_FIRST, -100f)
             ),
+            // for collector
+            Map.of(
+                    SimulationComponent.COMPLETION, 10f,
+                    SimulationComponent.KILLS, 0f,
+                    SimulationComponent.JUMPS, 0.001f,
+                    SimulationComponent.COINS, 0.2f,
+                    SimulationComponent.NOT_PASSED, -100f
+            ),
+            // for killer
             Map.of(
                     SimulationComponent.COMPLETION, 10f,
                     SimulationComponent.KILLS, 1f,
                     SimulationComponent.JUMPS, 0.001f,
-                    SimulationComponent.COINS, 0.1f,
+                    SimulationComponent.COINS, 0f,
                     SimulationComponent.NOT_PASSED, -100f
             )
     );

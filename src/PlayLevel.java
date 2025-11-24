@@ -68,23 +68,26 @@ public class PlayLevel {
             if (result.getGameStatus().toString().equals("WIN")) {
                 passed++;
             }
-            coins += result.getNumCollectedTileCoins();
+            coins += result.getCurrentCoins();
             kills += result.getKillsTotal();
         }
 
         System.out.println("\n========================================================================");
-        System.out.println("SUMMARY: Passed: " + passed + "/" + (files.length - passed));
+        System.out.println("SUMMARY: Passed: " + passed + "/" + (files.length));
         System.out.println("Success rate: " + String.format("%.2f", (passed * 100.0 / files.length)) + "%");
         System.out.println("Avg. Coins: " + (coins / (double) files.length));
         System.out.println("Avg. Kills: " + (kills / (double) files.length));
     }
 
     public static void main(String[] args) {
-        String folderPath = "./levels/MuPlusLambdaEvolution2/";
+//        String folderPath = "./levels/MuPlusLambdaEvolution1/";
+//        String folderPath = "./levels/MuPlusLambdaEvolution2/";
+        String folderPath = "./levels/MuPlusLambdaEvolution3/";
         int timer = 20;
         int marioState = 0;
         boolean visuals = true;
-        Supplier<MarioAgent> agent = agents.killer.Agent::new;
-        runAllLevelsInFolder(folderPath, timer, marioState, visuals, agent);
+//        runAllLevelsInFolder(folderPath, timer, marioState, visuals, agents.robinBaumgarten.Agent::new);
+//        runAllLevelsInFolder(folderPath, timer, marioState, visuals, agents.killer.Agent::new);
+        runAllLevelsInFolder(folderPath, timer, marioState, false, agents.killer.Agent::new);
     }
 }

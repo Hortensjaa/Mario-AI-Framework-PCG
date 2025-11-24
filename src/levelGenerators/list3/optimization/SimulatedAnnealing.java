@@ -56,7 +56,7 @@ public abstract class SimulatedAnnealing extends OptimizationAlgorithm {
             }
             j += 1;
             if (bestScoreHeuristic > 0 && j % simulateEvery == 0) {
-                float res = Evaluation.repeatedSimulation(bestLevelHeuristic, agent, weights, 5);
+                float res = Evaluation.repeatedSimulation(bestLevelHeuristic, agent, weights.getSimulationWeights(), 5);
                 float cumulative =
                         (res / weights.getSimulationUpperBound()) * 0.7f
                         + (bestScoreHeuristic / weights.getHeuristicUpperBound()) * 0.3f;
@@ -92,7 +92,7 @@ public abstract class SimulatedAnnealing extends OptimizationAlgorithm {
         System.out.println("BEST LEVEL CHOOSED! Cumulative: " + bestCumulativeScore
                 + " Heuristic: " + bestCumulativeHeuristicScore + " Simulation: " + bestCumulativeSimulationScore);
         if (bestCumulativeLevel != null) {
-            float res = Evaluation.simulation(bestCumulativeLevel, agent.get(), weights);
+            float res = Evaluation.simulation(bestCumulativeLevel, agent.get(), weights.getSimulationWeights());
             System.out.println("Re-evaluated simulation score: " + res);
             return bestCumulativeLevel;
         }
